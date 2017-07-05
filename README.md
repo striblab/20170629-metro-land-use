@@ -6,12 +6,13 @@ Analysis and visual for metro land use.
 ## Data
 
 * Land use data for the Twin Cities metro area on [MN Geospatial Commons](https://gisdata.mn.gov/dataset/us-mn-state-metc-plan-generl-lnduse-historical).
+* Counties and population by race via [Census Reporter](https://censusreporter.org/data/table/?table=B03002&geo_ids=050|04000US27).
+* Cities and population by race via [Census Reporter](https://censusreporter.org/data/table/?table=B03002&geo_ids=060|04000US27).
 
 ### Data processing
 
-1. *Data processing steps here.*
-1. ...
-
+1. Run the following: `npm run data`
+    * This is just a wrapper around [Jake](http://jakejs.com/) and any options can be passed, for instance `npm run data -- -ls`
 
 ## Embed
 
