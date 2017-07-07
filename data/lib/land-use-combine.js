@@ -10,6 +10,7 @@ const through = require('through2');
 const pace = require('pace');
 const turf = require('turf');
 const _ = require('lodash');
+const tripwire = require('tripwire');
 
 
 // Input and out
@@ -56,13 +57,17 @@ cities.features = cities.features.filter((f) => {
 });
 
 // Progress (manually known total);
-const pacer = pace(35241);
+const pacer = pace({
+  total: 35241,
+  showBurden: true,
+  maxBurden: 60
+});
 
 // Output streams
 let findExisting = (id) => {
-  return id ? _.find(output.features, (f) => {
+  return _.find(output.features, (f) => {
     return f.properties && f.properties.id === id && f.properties.countyID && f.properties.cityID;
-  }) : false;
+  });
 };
 
 // Save stream
@@ -88,23 +93,32 @@ let inputGeo = shapefile.createReadStream(argv['land-use'])
         saveOutput();
       }
       pacer.op();
+      tripwire.clearTripwire();
       next();
     };
 
-    // Check
-    if (!existing || p.error) {
-      // Timeout
-      let t = setTimeout(() => {
+    // Timeout
+    let timeout = (e) => {
+      let t = tripwire.getContext();
+      if (t) {
         console.error('Timeout error.');
         p.error = 'Timeout';
-        output.features.push(feature);
         moveOn();
-      }, 20000);
+      }
+      else {
+        saveOutput();
+        throw e;
+      }
+    };
+    process.on('uncaughtException', timeout);
+    tripwire.resetTripwire(20000);
+
+    // Check
+    if (!existing) {
+      // ID
+      p.id = countID;
 
       try {
-        // ID
-        p.id = countID;
-
         // Cleanup some bad fields
         _.each(p, (v, k) => {
           p[k] = _.isString(v) ? v.trim().replace(/[^a-z0-9-,.\s\\/]/ig, '') : v;
@@ -147,7 +161,6 @@ let inputGeo = shapefile.createReadStream(argv['land-use'])
         output.features.push(feature);
       }
 
-      clearTimeout(t);
       moveOn();
     }
     else {
@@ -163,7 +176,7 @@ let inputGeo = shapefile.createReadStream(argv['land-use'])
     // Nothing
   })
   .on('finish', () => {
-    console.log('Done reading.');
+    //console.log('Done reading.');
   });
 
 
@@ -171,7 +184,7 @@ let inputGeo = shapefile.createReadStream(argv['land-use'])
 process.on('SIGINT', function() {
   saveOutput();
   console.error('Aborting...');
-  process.exit();
+  process.exit(0);
 });
 
 // Find intersscetion in JSON

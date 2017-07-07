@@ -147,4 +147,33 @@ jakeConfig([
       'sources/mn-counties-acs2015-pop-race/acs2015_5yr_B03002_05000US27079/acs2015_5yr_B03002_05000US27079.geojson',
       'sources/mn-subcounties-acs2015-pop-race/acs2015_5yr_B03002_06000US2713904852/acs2015_5yr_B03002_06000US2713904852.geojson']
   },
+  {
+    task: 'build/land-use-inventories-combined.json',
+    desc: 'Combine land use inventories data.',
+    group: 'combine',
+    commands: [
+      ['node ./lib/land-use-inventory-combine.js ',
+        '--counties="sources/land-use-inventory-counties/DataDownload-land_use.csv"',
+        '--cities="sources/land-use-inventory-cities/DataDownload-land_use.csv"',
+        '--output="build/land-use-inventories-combined.json"']
+    ],
+    deps: [
+      'sources/land-use-inventory-cities/DataDownload-land_use.csv',
+      'sources/land-use-inventory-counties/DataDownload-land_use.csv']
+  },
+
+
+  // Analysis
+  {
+    type: 'task',
+    task: 'land-use-inventory-analysis',
+    desc: 'Combine land use and population data.',
+    group: 'analysis',
+    commands: [
+      ['node ./lib/land-use-inventory-analysis.js ',
+        '--land-use="build/land-use-inventories-combined.json" ']
+    ],
+    deps: [
+      'build/land-use-inventories-combined.json']
+  },
 ]);
