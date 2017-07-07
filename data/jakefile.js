@@ -5,11 +5,15 @@
  */
 
 // Dependencies
+const os = require('os');
 const jake = require('jake');
 const jakeConfig = require('./lib/jake-config.js');
 
 // Change directory to this one
 process.chdir(__dirname);
+
+// User name
+let username = os.userInfo().username;
 
 // Main default task
 jake.desc('Main/default task to fully process data.');
@@ -131,23 +135,6 @@ jakeConfig([
 
   // Combine
   {
-    type: 'task',
-    task: 'build/land-use-combined.geo.json',
-    desc: 'Combine land use and population data.',
-    group: 'combine',
-    commands: [
-      ['node ./lib/land-use-combine.js ',
-        '--land-use="build/land-use-4326/land-use-4326.shp" ',
-        '--counties="sources/mn-counties-acs2015-pop-race/acs2015_5yr_B03002_05000US27079/acs2015_5yr_B03002_05000US27079.geojson"',
-        '--cities="sources/mn-subcounties-acs2015-pop-race/acs2015_5yr_B03002_06000US2713904852/acs2015_5yr_B03002_06000US2713904852.geojson"',
-        '--output="build/land-use-combined.geo.json"']
-    ],
-    deps: [
-      'build/land-use-4326/land-use-4326.shp',
-      'sources/mn-counties-acs2015-pop-race/acs2015_5yr_B03002_05000US27079/acs2015_5yr_B03002_05000US27079.geojson',
-      'sources/mn-subcounties-acs2015-pop-race/acs2015_5yr_B03002_06000US2713904852/acs2015_5yr_B03002_06000US2713904852.geojson']
-  },
-  {
     task: 'build/land-use-inventories-combined.json',
     desc: 'Combine land use inventories data.',
     group: 'combine',
@@ -163,7 +150,90 @@ jakeConfig([
   },
 
 
-  // Analysis
+  // Combine and process with PostGIS.
+  {
+    task: 'data/build/land-use-combined/land-use-combined.shp',
+    desc: 'Combine and process with PostGIS.  Will take some time.',
+    group: 'process',
+    commands: [
+      // Setup database
+      'createdb land_use;',
+      // Setup PostGIS
+      'psql -d land_use -c "CREATE EXTENSION postgis;"',
+      'psql -d land_use -c "CREATE EXTENSION postgis_topology;"',
+      // Import land use
+      'shp2pgsql -s 4326 build/land-use-4326/land-use-4326.shp land_use | psql -d land_use',
+      // Import subcounties
+      [
+        'ogr2ogr -f "PostgreSQL" PG:"dbname=land_use user=' + username + '" ',
+        '"sources/mn-subcounties-acs2015-pop-race/acs2015_5yr_B03002_06000US2713904852/acs2015_5yr_B03002_06000US2713904852.geojson" ',
+        '-nln mn_subcounties -s_srs "EPSG:4326" -t_srs "EPSG:4326" ',
+        '-lco GEOMETRY_NAME=geom'
+      ],
+      [
+        'ogr2ogr -f "PostgreSQL" PG:"dbname=land_use user=' + username + '" ',
+        '"data/sources/mn-counties-acs2015-pop-race/acs2015_5yr_B03002_05000US27079/acs2015_5yr_B03002_05000US27079.geojson" ',
+        '-nln mn_counties -s_srs "EPSG:4326" -t_srs "EPSG:4326" ',
+        '-lco GEOMETRY_NAME=geom'
+      ],
+      // Run processing script
+      'psql -d land_use -a -f lib/land-use-processing.sql',
+      // Output to shapefile
+      'pgsql2shp -f build/land-use-combined/land-use-combined.shp land_use "SELECT * FROM land_use_split_co" -g geom'
+    ],
+    deps: [
+      'build/land-use-4326/land-use-4326.shp',
+      'sources/mn-subcounties-acs2015-pop-race/acs2015_5yr_B03002_06000US2713904852/acs2015_5yr_B03002_06000US2713904852.geojson',
+      'data/sources/mn-counties-acs2015-pop-race/acs2015_5yr_B03002_05000US27079/acs2015_5yr_B03002_05000US27079.geojson'
+    ]
+  },
+
+
+  // Land use formatting
+  {
+    task: 'build/land-use-formatted.geo.json',
+    desc: 'Format and process land use combined data.',
+    group: 'format',
+    commands: [
+      [
+        'node ./lib/land-use-format.js ',
+        '--land-use="build/land-use-combined/land-use-combined.shp" ',
+        '--cities="sources/mn-subcounties-acs2015-pop-race/acs2015_5yr_B03002_06000US2713904852/acs2015_5yr_B03002_06000US2713904852.geojson" ',
+        '--counties="sources/mn-counties-acs2015-pop-race/acs2015_5yr_B03002_05000US27079/acs2015_5yr_B03002_05000US27079.geojson" ',
+        '--output=build/land-use-formatted.geo.json'
+      ]
+    ],
+    deps: [
+      'build/land-use-combined/land-use-combined.shp',
+      'sources/mn-subcounties-acs2015-pop-race/acs2015_5yr_B03002_06000US2713904852/acs2015_5yr_B03002_06000US2713904852.geojson',
+      'sources/mn-counties-acs2015-pop-race/acs2015_5yr_B03002_05000US27079/acs2015_5yr_B03002_05000US27079.geojson']
+  },
+
+
+  // Export undeveloped to shapefile for Carto
+  {
+    task: 'build/land-use-undeveloped-2005-2010.zip',
+    desc: 'Export land use data into shapefile.',
+    group: 'export',
+    commands: [
+      'mkdir -p build/land-use-undeveloped-2005-2010',
+      [
+        'ogr2ogr -F "ESRI Shapefile" "build/land-use-undeveloped-2005-2010/land-use-undeveloped-2005-2010.shp" ',
+        '"build/land-use-formatted.geo.json" ',
+        '-sql "SELECT LUD_2005, LUD_2010, LUD_2016, luc_2005, luc_2010, luc_2016, ch20052010, ch20102016',
+        'FROM OGRGeoJSON WHERE (ch20052010 <> \'undeveloped-undeveloped\' AND ch20052010 LIKE \'undeveloped-%\')',
+        'OR (ch20102016  <> \'undeveloped-undeveloped\' AND ch20102016 LIKE \'undeveloped-%\')"'
+      ],
+      'zip -r build/land-use-undeveloped-2005-2010.zip build/land-use-undeveloped-2005-2010/'
+    ],
+    deps: [
+      'build/land-use-formatted.geo.json',
+    ]
+  },
+
+
+
+  // Land use inventory analysis
   {
     type: 'task',
     task: 'land-use-inventory-analysis',

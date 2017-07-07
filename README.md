@@ -12,6 +12,11 @@ Analysis and visual for metro land use.
 
 ### Data processing
 
+1. Install dependencies for PostGIS, wget, ogr2ogr.
+    * On a Mac: `brew install postgis wget gdal`
+        * You can use the [Postgres app](https://postgresapp.com/), but make sure to install `postgis` through Homebrew so that `shp2pgsql` is available.
+    * NOTE: PostGIS is used because processing via Node.js is prohibitively slow.
+1. Make sure Postgres is running.
 1. Run the following: `npm run data`
     * This is just a wrapper around [Jake](http://jakejs.com/) and any options can be passed, for instance `npm run data -- -ls`
 

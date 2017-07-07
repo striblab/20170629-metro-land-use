@@ -1,0 +1,70 @@
+#layer {
+  polygon-fill: #CACACA;
+  polygon-opacity: 0.3;
+  polygon-gamma: 0.2;
+  line-width: 0;
+  line-color: #000000;
+  line-opacity: 0.8;
+}
+
+
+
+#layer[change2005 =~ ".*--commercial"] {
+  polygon-fill: #0868ac;
+  polygon-opacity: 0.2;
+
+  [change2005 = "undeveloped--commercial"] {
+  polygon-opacity: 0.9;
+  }
+}
+
+#layer[change2005 =~ ".*--industrial$"] {
+  polygon-fill: #993404;
+  polygon-opacity: 0.2;
+
+  [change2005 = "undeveloped--industrial"] {
+  	polygon-opacity: 0.9;
+  }
+}
+
+#layer[change2005 =~ ".*--residential$"] {
+  polygon-fill: #006837;
+  polygon-opacity: 0.2;
+
+  [change2005 = "undeveloped--residential"] {
+  	polygon-opacity: 0.9;
+  }
+}
+
+#layer[change2005 =~ ".*--residential-dense$"] {
+  polygon-fill: #7a0177;
+  polygon-opacity: 0.2;
+
+  [change2005 = "undeveloped--residential-dense"] {
+  	polygon-opacity: 0.9;
+  }
+}
+
+#layer[change2005 =~ ".*--park$"] {
+  polygon-fill: #b2df8a;
+  polygon-opacity: 0.2;
+
+  [change2005 = "undeveloped--park"] {
+  	polygon-opacity: 0.9;
+  }
+}
+
+#layer[change2005 =~ ".*--agricultural$"] {
+  polygon-fill: #ffff99;
+  polygon-opacity: 0.2;
+
+  [change2005 = "undeveloped--agricultural"] {
+  	polygon-opacity: 0.9;
+  }
+}
+
+
+
+#layer[change2005 =~ "undeveloped--(?!undeveloped).*"] {
+  polygon-pattern-file: url("https://www.transparenttextures.com/patterns/3px-tile.png");
+}

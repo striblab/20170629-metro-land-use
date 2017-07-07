@@ -13,6 +13,10 @@ data/build/*
 # Exceptions, like
 # !data/build/combined-data.csv
 
+# SQL scripts exceptions
+*.sql
+!data/lib/*.sql
+
 
 # Common
 *yarn.lock
@@ -70,7 +74,7 @@ coverage
 
 # Logs and databases
 *.log
-*.sql
+#*.sql
 *.sqlite
 
 # OS generated files

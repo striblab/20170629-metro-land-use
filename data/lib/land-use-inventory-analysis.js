@@ -45,6 +45,8 @@ let categoryChange = (filter, y1 = 2010, y2 = 2016, category = 'undeveloped') =>
 
 // Undeveloped change
 console.table('Undeveloped by county 2010-2016', categoryChange('county'));
+console.table('Undeveloped by county 2005-2010', categoryChange('county', 2005, 2010));
+console.table('Undeveloped by county 2000-2005', categoryChange('county', 2000, 2005));
 console.table('Undeveloped by city (10000+ acres) 2010-2016', categoryChange((a) => {
   return a.type === 'city' && a.acres >= 10000;
 }));
