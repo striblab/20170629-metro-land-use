@@ -6,7 +6,9 @@
 const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
-require('console.table');
+const mkdirp = require('mkdirp');
+const csv = require('d3-dsv').dsvFormat(',');
+const table = require('./console-table.js');
 
 // Input and out
 const argv = require('yargs').argv;
@@ -21,8 +23,30 @@ function inputJSON(i) {
 
 const inventory = inputJSON(argv['land-use']);
 
+// Output csv
+const outputCSV = (name, data) => {
+  data = _.map(data);
+  const dir = path.join(__dirname, '..', 'build', 'land-use-inventory-analysis-outputs');
+  mkdirp.sync(dir);
+  fs.writeFileSync(path.join(dir, name), csv.format(data));
+};
+
+// Join on field
+const join = (key, fields, sort, ...inputs) => {
+  let output = {};
+
+  inputs.forEach((set) => {
+    _.each(set, (row) => {
+      output[row[key]] = output[row[key]] || {};
+      output[row[key]] = _.merge(output[row[key]], _.pick(row, [key].concat(fields)));
+    });
+  });
+
+  return _.sortBy(output, sort);
+};
+
 // Category change
-let categoryChange = (filter, y1 = 2010, y2 = 2016, category = 'undeveloped') => {
+const categoryChange = (filter, y1 = 2010, y2 = 2016, category = 'undeveloped') => {
   filter = _.isString(filter) ? { type: filter } : filter;
 
   return _.sortBy(_.map(_.groupBy(_.filter(inventory, filter), 'name'), (area, ci) => {
@@ -35,33 +59,54 @@ let categoryChange = (filter, y1 = 2010, y2 = 2016, category = 'undeveloped') =>
     let output = {};
 
     output.area = ci;
-    output[category + ' ' + y1] = Math.round(a1);
-    output[category + ' ' + y2] = Math.round(a2);
-    output['% change'] = Math.round(((a2 - a1) / a1) * 10000) / 100;
+    output[category + ' acres ' + y1] = Math.round(a1);
+    output[category + ' acres ' + y2] = Math.round(a2);
+    output[y1 + ' ' + y2 + ' % change'] = Math.round(((a2 - a1) / a1) * 10000) / 100;
 
     return output;
   }), '% change');
 };
 
 // Undeveloped change
-console.table('Undeveloped by county 2010-2016', categoryChange('county'));
-console.table('Undeveloped by county 2005-2010', categoryChange('county', 2005, 2010));
-console.table('Undeveloped by county 2000-2005', categoryChange('county', 2000, 2005));
-console.table('Undeveloped by city (10000+ acres) 2010-2016', categoryChange((a) => {
+table('Undeveloped by county 2010-2016', categoryChange('county'));
+table('Undeveloped by county 2005-2010', categoryChange('county', 2005, 2010));
+table('Undeveloped by county 2000-2005', categoryChange('county', 2000, 2005));
+table('Undeveloped by city (10000+ acres) 2010-2016', categoryChange((a) => {
   return a.type === 'city' && a.acres >= 10000;
 }));
 
 // Industrial change
-console.table('Industrial by county 2010-2016', categoryChange('county', 2010, 2016, 'industrial'));
-console.table('Industrial by city (10000+ acres) 2010-2016', categoryChange((a) => {
+table('Industrial by county 2010-2016', categoryChange('county', 2010, 2016, 'industrial'));
+table('Industrial by city (10000+ acres) 2010-2016', categoryChange((a) => {
   return a.type === 'city' && a.acres >= 10000;
 }, 2010, 2016, 'industrial'));
 
 // Industrial change
-console.table('Residential (low density) by county 2010-2016', categoryChange('county', 2010, 2016, 'residential'));
-console.table('Residential (low density) by city (10000+ acres) 2010-2016', categoryChange((a) => {
+table('Residential (low density) by county 2010-2016', categoryChange('county', 2010, 2016, 'residential'));
+table('Residential (low density) by city (10000+ acres) 2010-2016', categoryChange((a) => {
   return a.type === 'city' && a.acres >= 10000;
 }, 2010, 2016, 'residential'));
+
+
+// All category changes by county
+['undeveloped', 'residential', 'residential-dense', 'industrial', 'commercial', 'park'].forEach((cat) => {
+  outputCSV(cat + '-use-change-by-county.csv',
+    join('area', [cat + ' acres 2000', '2000 2005 % change', '2005 2010 % change', '2010 2016 % change'],
+      'area',
+      categoryChange('county', 2000, 2005, cat),
+      categoryChange('county', 2005, 2010, cat),
+      categoryChange('county', 2010, 2016, cat)));
+});
+
+// All category changes by city
+['undeveloped', 'residential', 'residential-dense', 'industrial', 'commercial', 'park'].forEach((cat) => {
+  outputCSV(cat + '-use-change-by-city.csv',
+    join('area', [cat + ' acres 2000', '2000 2005 % change', '2005 2010 % change', '2010 2016 % change'],
+      'area',
+      categoryChange('city', 2000, 2005, cat),
+      categoryChange('city', 2005, 2010, cat),
+      categoryChange('city', 2010, 2016, cat)));
+});
 
 
 // All changes
@@ -85,8 +130,8 @@ let allChanges = (filter, y1 = 2010, y2 = 2016) => {
     return output;
   }), '% of total ' + y2);
 };
-console.table('All category changes by county 2010-2016', allChanges('county'));
-console.table('All category changes by county 2005-2010', allChanges('county', 2005, 2010));
-console.table('All category changes by city (10000+ acres) 2010-2016', allChanges((a) => {
+table('All category changes by county 2010-2016', allChanges('county'));
+table('All category changes by county 2005-2010', allChanges('county', 2005, 2010));
+table('All category changes by city (10000+ acres) 2010-2016', allChanges((a) => {
   return a.type === 'city' && a.acres >= 10000;
 }));

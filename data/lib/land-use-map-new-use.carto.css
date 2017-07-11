@@ -1,70 +1,42 @@
+
+@color-res-2016: #984ea3;
+@color-res-2010: lighten(@color-res-2016, 35%);
+
+@color-res-dense-2016: #f781bf;
+@color-res-dense-2010: lighten(@color-res-dense-2016, 35%);
+
+@color-ind-2016: #ff7f00;
+@color-ind-2010: lighten(@color-ind-2016, 35%);
+
+@color-comm-2016: #377eb8;
+@color-comm-2010: lighten(@color-comm-2016, 35%);
+
+@color-park-2016: #4daf4a;
+@color-park-2010: lighten(@color-park-2016, 35%);
+
+@color-mixed-2016: #a65628;
+@color-mixed-2010: lighten(@color-mixed-2016, 35%);
+
+@color-trans-2016: #ffff33;
+@color-trans-2010: lighten(@color-trans-2016, 35%);
+
+@color-oth-2016: #999999;
+@color-oth-2010: lighten(@color-oth-2016, 35%);
+
+
 #layer {
-  polygon-fill: #CACACA;
-  polygon-opacity: 0.3;
-  polygon-gamma: 0.2;
+  polygon-fill: transparent;
   line-width: 0;
-  line-color: #000000;
-  line-opacity: 0.8;
+  line-color: #ffffff;
+  line-opacity: 1;
 }
 
-
-
-#layer[change2005 =~ ".*--commercial"] {
-  polygon-fill: #0868ac;
-  polygon-opacity: 0.2;
-
-  [change2005 = "undeveloped--commercial"] {
-  polygon-opacity: 0.9;
-  }
+#layer[ch20102016 =~ "undeveloped-(?!undeveloped).*"] {
+  polygon-fill: ramp([luc_2016], (@color-res-2016, @color-res-dense-2016, @color-ind-2016, @color-comm-2016, @color-park-2016, @color-mixed-2016, @color-trans-2016, @color-oth-2016), ("residential", "residential-dense", "industrial", "commercial", "park", "mixed", "transportation", "other"), "=");
 }
 
-#layer[change2005 =~ ".*--industrial$"] {
-  polygon-fill: #993404;
-  polygon-opacity: 0.2;
+#layer[ch20052010 =~ "undeveloped-(?!undeveloped).*"] {
+  polygon-fill: ramp([luc_2010], (@color-res-2010, @color-res-dense-2010, @color-ind-2010, @color-comm-2010, @color-park-2010, @color-mixed-2010, @color-trans-2010, @color-oth-2010), ("residential", "residential-dense", "industrial", "commercial", "park", "mixed", "transportation", "other"), "=");
 
-  [change2005 = "undeveloped--industrial"] {
-  	polygon-opacity: 0.9;
-  }
-}
-
-#layer[change2005 =~ ".*--residential$"] {
-  polygon-fill: #006837;
-  polygon-opacity: 0.2;
-
-  [change2005 = "undeveloped--residential"] {
-  	polygon-opacity: 0.9;
-  }
-}
-
-#layer[change2005 =~ ".*--residential-dense$"] {
-  polygon-fill: #7a0177;
-  polygon-opacity: 0.2;
-
-  [change2005 = "undeveloped--residential-dense"] {
-  	polygon-opacity: 0.9;
-  }
-}
-
-#layer[change2005 =~ ".*--park$"] {
-  polygon-fill: #b2df8a;
-  polygon-opacity: 0.2;
-
-  [change2005 = "undeveloped--park"] {
-  	polygon-opacity: 0.9;
-  }
-}
-
-#layer[change2005 =~ ".*--agricultural$"] {
-  polygon-fill: #ffff99;
-  polygon-opacity: 0.2;
-
-  [change2005 = "undeveloped--agricultural"] {
-  	polygon-opacity: 0.9;
-  }
-}
-
-
-
-#layer[change2005 =~ "undeveloped--(?!undeveloped).*"] {
-  polygon-pattern-file: url("https://www.transparenttextures.com/patterns/3px-tile.png");
+  polygon-opacity: 0.75;
 }
