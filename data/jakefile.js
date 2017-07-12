@@ -232,6 +232,36 @@ jakeConfig([
   },
 
 
+  // Land use aggregate for analysis
+  {
+    task: 'build/land-use-aggregate.json',
+    desc: 'Aggregate land use features for analysis.',
+    group: 'aggregate',
+    commands: [
+      [
+        'node ./lib/land-use-aggregate.js ',
+        '--land-use="build/land-use-formatted.geo.json" ',
+        '--output="build/land-use-aggregate.json"'
+      ]
+    ],
+    deps: [
+      'build/land-use-formatted.geo.json']
+  },
+
+
+  // Land use inventory analysis
+  {
+    type: 'task',
+    task: 'land-use-analysis',
+    desc: 'Land use aggregate analysis.',
+    group: 'analysis',
+    commands: [
+      ['node ./lib/land-use-analysis.js ',
+        '--aggregates="build/land-use-aggregate.json" ']
+    ],
+    deps: [
+      'build/land-use-aggregate.json']
+  },
 
   // Land use inventory analysis
   {

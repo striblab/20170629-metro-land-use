@@ -9,6 +9,7 @@ const _ = require('lodash');
 const mkdirp = require('mkdirp');
 const csv = require('d3-dsv').dsvFormat(',');
 const table = require('./console-table.js');
+const categories = require('./categories.js');
 
 // Input and out
 const argv = require('yargs').argv;
@@ -38,7 +39,9 @@ const join = (key, fields, sort, ...inputs) => {
   inputs.forEach((set) => {
     _.each(set, (row) => {
       output[row[key]] = output[row[key]] || {};
-      output[row[key]] = _.merge(output[row[key]], _.pick(row, [key].concat(fields)));
+      output[row[key]] = _.merge(output[row[key]],
+        fields ? _.pick(row, [key].concat(fields)) :
+          row);
     });
   });
 
@@ -59,8 +62,11 @@ const categoryChange = (filter, y1 = 2010, y2 = 2016, category = 'undeveloped') 
     let output = {};
 
     output.area = ci;
+    output['all acres'] = Math.round(area[0].acres);
     output[category + ' acres ' + y1] = Math.round(a1);
+    output[category + ' % acres ' + y1] = Math.round((a1 / area[0].acres) * 10000) / 100;
     output[category + ' acres ' + y2] = Math.round(a2);
+    output[category + ' % acres ' + y2] = Math.round((a2 / area[0].acres) * 10000) / 100;
     output[y1 + ' ' + y2 + ' % change'] = Math.round(((a2 - a1) / a1) * 10000) / 100;
 
     return output;
@@ -89,23 +95,16 @@ table('Residential (low density) by city (10000+ acres) 2010-2016', categoryChan
 
 
 // All category changes by county
-['undeveloped', 'residential', 'residential-dense', 'industrial', 'commercial', 'park'].forEach((cat) => {
-  outputCSV(cat + '-use-change-by-county.csv',
-    join('area', [cat + ' acres 2000', '2000 2005 % change', '2005 2010 % change', '2010 2016 % change'],
-      'area',
-      categoryChange('county', 2000, 2005, cat),
-      categoryChange('county', 2005, 2010, cat),
-      categoryChange('county', 2010, 2016, cat)));
-});
-
-// All category changes by city
-['undeveloped', 'residential', 'residential-dense', 'industrial', 'commercial', 'park'].forEach((cat) => {
-  outputCSV(cat + '-use-change-by-city.csv',
-    join('area', [cat + ' acres 2000', '2000 2005 % change', '2005 2010 % change', '2010 2016 % change'],
-      'area',
-      categoryChange('city', 2000, 2005, cat),
-      categoryChange('city', 2005, 2010, cat),
-      categoryChange('city', 2010, 2016, cat)));
+let areas = ['county', 'city'];
+let cats = _.keys(categories.categories);
+areas.forEach((area) => {
+  cats.forEach((cat) => {
+    outputCSV(cat + '-use-change-by-' + area + '.csv',
+      join('area', undefined, 'area',
+        categoryChange(area, 2000, 2005, cat),
+        categoryChange(area, 2005, 2010, cat),
+        categoryChange(area, 2010, 2016, cat)));
+  });
 });
 
 
@@ -123,15 +122,15 @@ let allChanges = (filter, y1 = 2010, y2 = 2016) => {
     let output = {};
 
     output.area = ci;
-    output['total acres ' + y2] = Math.round(c2.acres)
+    output['total acres ' + y2] = Math.round(c2.acres);
     output['acres changed'] = Math.round(changed);
     output['% of total ' + y2] = Math.round((changed / c2.acres) * 10000) / 100;
 
     return output;
   }), '% of total ' + y2);
 };
-table('All category changes by county 2010-2016', allChanges('county'));
-table('All category changes by county 2005-2010', allChanges('county', 2005, 2010));
-table('All category changes by city (10000+ acres) 2010-2016', allChanges((a) => {
-  return a.type === 'city' && a.acres >= 10000;
-}));
+// table('All category changes by county 2010-2016', allChanges('county'));
+// table('All category changes by county 2005-2010', allChanges('county', 2005, 2010));
+// table('All category changes by city (10000+ acres) 2010-2016', allChanges((a) => {
+//   return a.type === 'city' && a.acres >= 10000;
+// }));

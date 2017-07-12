@@ -44,7 +44,11 @@ let output = fs.createWriteStream(argv.output)
     console.error(error);
   });
 
+// Count features.
+let featureCount = 0;
+
 // Read in data
+console.log('\nStreaming data and formatting...\n');
 let landUse = argv['land-use'][0] === '/' ? argv['land-use'] : path.join(process.cwd(), argv['land-use']);
 let input = shapefile.createReadStream(landUse)
   .pipe(through.obj(function(feature, enc, next) {
@@ -76,8 +80,9 @@ let input = shapefile.createReadStream(landUse)
       console.error(p);
     }
     else {
+      p.co_name = county.name.replace(' County, MN', '');
       p.co_pop = county.B03002001;
-      p.co_popE = county['B03002001, Error'];
+      p.co_pop_e = county['B03002001, Error'];
     }
 
     let city = citiesL[p.SC_ID];
@@ -86,10 +91,22 @@ let input = shapefile.createReadStream(landUse)
       console.error(p);
     }
     else {
+      p.sc_name = city.name.replace(', MN', '');
       p.sc_pop = city.B03002001;
-      p.sc_popE = city['B03002001, Error'];
+      p.sc_pop_e = city['B03002001, Error'];
     }
 
+    // Convert to acres
+    p.acres = sqMetersToAcres(p.AREA);
+
+    // Lowercase name
+    let lowered = {};
+    _.each(p, (v, k) => {
+      lowered[k.toLowerCase()] = v;
+    });
+    feature.properties = lowered;
+
+    featureCount++;
     this.push(feature);
     next(null);
   }))
@@ -101,9 +118,14 @@ let input = shapefile.createReadStream(landUse)
     console.error(error);
   })
   .on('finish', () => {
-    console.log('Done reading.');
+    console.log('Done reading ' + featureCount + ' features.');
   });
 
 // Transform to geojson
 input.pipe(geojson.stringify())
   .pipe(output);
+
+// Square meters to acres
+const sqMetersToAcres = (input) => {
+  return input * 0.000247105;
+};
