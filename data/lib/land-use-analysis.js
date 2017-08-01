@@ -26,6 +26,7 @@ function inputJSON(i) {
 }
 const aggregates = inputJSON(argv.aggregates);
 
+// Count specific types of changes for different groups
 ['byCounty', 'byPopulation', 'byCity'].forEach((set) => {
   [
     { label: 'prev undeveloped', fields: '^chYYYY-undeveloped-->(residential|residential-dense|commercial|industrial|mixed|transportation)$' },
@@ -64,6 +65,32 @@ const aggregates = inputJSON(argv.aggregates);
     outputCSV(file, _.sortBy(collected, 'area'));
   });
 });
+
+
+// Count all changes for specific cities.  These are the highest by raw acre change in broad category
+['St. Paul city, Ramsey County', 'Maple Grove city, Hennepin County', 'Woodbury city, Washington County', 'Minneapolis city, Hennepin County', 'Lakeville city, Dakota County'].forEach((area) => {
+  let city = aggregates.byCity[area];
+  let collected = [];
+
+  _.each(city, (value, property) => {
+    let p = property.match(/^ch([0-9]{4})([0-9]{4})-(.+)-->(.+)/i);
+    if (p && p[3] !== p[4]) {
+      collected.push({
+        'start year': p[1],
+        'end year': p[2],
+        'from': p[3],
+        'to': p[4],
+        acres: value,
+        '% acres of total': value / city.countedAcres
+      });
+    }
+  });
+
+  // Output to file
+  let file = 'all-changes-for-' + _.kebabCase(area) + '.csv';
+  outputCSV(file, _.orderBy(collected, ['end year', 'start year', 'acres'], ['desc', 'desc', 'desc']));
+});
+
 
 
 // Sum fields
