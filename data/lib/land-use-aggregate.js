@@ -139,7 +139,12 @@ const aggregate = (area, p) => {
     area[f + '-' + p[f]] = sumField(area[f + '-' + p[f]], p.acres || 0, 0);
   });
 
-  // Acres changed
+  // Original category acres changed
+  ['cd20002005', 'cd20002010', 'cd20002016', 'cd20052010', 'cd20052016', 'cd20102016'].forEach((f) => {
+    area[f + '-' + p[f]] = sumField(area[f + '-' + p[f]], p.acres || 0, 0);
+  });
+
+  // General category acres changed
   ['ch20002005', 'ch20002010', 'ch20002016', 'ch20052010', 'ch20052016', 'ch20102016'].forEach((f) => {
     area[f + '-' + p[f]] = sumField(area[f + '-' + p[f]], p.acres || 0, 0);
   });

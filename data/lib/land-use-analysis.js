@@ -16,6 +16,9 @@ const argv = require('yargs').argv;
 if (!argv.aggregates) {
   throw new Error('--aggregates required');
 }
+if (!argv.output) {
+  throw new Error('--output required');
+}
 
 // Load up data to match
 function inputJSON(i) {
@@ -23,15 +26,19 @@ function inputJSON(i) {
 }
 const aggregates = inputJSON(argv.aggregates);
 
-
 ['byCounty', 'byPopulation', 'byCity'].forEach((set) => {
   [
-    { label: 'prev undeveloped', fields: '-undeveloped-(?!undeveloped).*$' },
-    { label: 'prev not park', fields: '-(?!park).*-park$' },
-    { label: 'residential to dense residential', fields: '-residential-residential-dense$' },
-    { label: 'industrial to residential', fields: '-industrial-residential.*$' },
-    { label: 'commercial to mixed', fields: '-commercial-mixed.*$' },
-    { label: 'unchanged', fields: '-([^\\-]*(-dense)?)-\\1$' }
+    { label: 'prev undeveloped', fields: '^chYYYY-undeveloped-->(residential|residential-dense|commercial|industrial|mixed|transportation)$' },
+    { label: 'prev not park', fields: '^chYYYY-(?!park).*-->park$' },
+    { label: 'residential to dense residential', fields: '^chYYYY-residential-->residential-dense$' },
+    { label: 'industrial to residential', fields: '^chYYYY-industrial-->residential.*$' },
+    { label: 'commercial to mixed', fields: '^chYYYY-commercial-->mixed.*$' },
+    { label: 'undeveloped to commercial or industrial', fields: '^chYYYY-undeveloped-->(commerical|industrial)$' },
+    { label: 'unchanged', fields: '^chYYYY-(.+)-->\\1$' },
+    { label: 'changed-broad-category', fields: '^chYYYY-(.+)-->((?!\\1).+$|\\1.+$)' },
+    { label: 'changed-specific-category', fields: '^cdYYYY-(.+)-->((?!\\1).+$|\\1.+$)' },
+    { label: 'prev golf course', fields: '^cdYYYY-(.*golf.*)-->((?!golf).)*$' },
+    { label: 'golf course to residential', fields: '^cdYYYY-(.*golf.*)-->.*(family|farmstead|housing|seasonal).*$' }
   ].forEach((filter) => {
     let collected = _.map(aggregates[set], (area) => {
       let row = {
@@ -43,7 +50,7 @@ const aggregates = inputJSON(argv.aggregates);
         let y1 = years.substring(0, 4);
         let y2 = years.substring(4, 8);
 
-        let r = new RegExp(years + filter.fields, 'i');
+        let r = new RegExp(filter.fields.replace('YYYY', years), 'i');
         let sum = sumFields(r, area);
         row[y1 + ' to ' + y2 + ' ' + filter.label] = sum;
         row[y1 + ' to ' + y2 + ' ' + filter.label + ' % area'] = percent(sum / area.countedAcres);
@@ -57,33 +64,6 @@ const aggregates = inputJSON(argv.aggregates);
     outputCSV(file, _.sortBy(collected, 'area'));
   });
 });
-
-
-
-
-// { population: 823,
-// populationError: 89,
-// countedAcres: 3.086218240205205e-9,
-// 'lud_1984-No Data': 3.086218240205205e-9,
-// 'lud_1990-No Data': 3.086218240205205e-9,
-// 'lud_1997-Vacant/Agricultural': 3.086218240205205e-9,
-// 'lud_2000-Agricultural': 3.086218240205205e-9,
-// 'lud_2005-Agricultural': 3.086218240205205e-9,
-// 'lud_2010-Agricultural': 3.086218240205205e-9,
-// 'lud_2016-Agricultural': 3.086218240205205e-9,
-// 'luc_1984-unknown': 3.086218240205205e-9,
-// 'luc_1990-unknown': 3.086218240205205e-9,
-// 'luc_1997-undeveloped': 3.086218240205205e-9,
-// 'luc_2000-undeveloped': 3.086218240205205e-9,
-// 'luc_2005-undeveloped': 3.086218240205205e-9,
-// 'luc_2010-undeveloped': 3.086218240205205e-9,
-// 'luc_2016-undeveloped': 3.086218240205205e-9,
-// 'ch20002005-undeveloped-undeveloped': 3.086218240205205e-9,
-// 'ch20002010-undeveloped-undeveloped': 3.086218240205205e-9,
-// 'ch20002016-undeveloped-undeveloped': 3.086218240205205e-9,
-// 'ch20052010-undeveloped-undeveloped': 3.086218240205205e-9,
-// 'ch20052016-undeveloped-undeveloped': 3.086218240205205e-9,
-// 'ch20102016-undeveloped-undeveloped': 3.086218240205205e-9 }
 
 
 // Sum fields
@@ -103,7 +83,7 @@ function sumFields(reg, data) {
 // Output csv
 function outputCSV(name, data) {
   data = _.map(data);
-  const dir = path.join(__dirname, '..', 'build', 'land-use-analysis-outputs');
+  const dir = argv.output[0] === '/' ? argv.output : path.join(process.cwd(), argv.output);
   mkdirp.sync(dir);
   fs.writeFileSync(path.join(dir, name), csv.format(data));
 }

@@ -56,7 +56,7 @@ let input = shapefile.createReadStream(landUse)
 
     // Main transformation
 
-    // Categories
+    // General categories
     p.luc_1984 = categories.categorize(p.LUD_1984);
     p.luc_1990 = categories.categorize(p.LUD_1990);
     p.luc_1997 = categories.categorize(p.LUD_1997);
@@ -65,13 +65,21 @@ let input = shapefile.createReadStream(landUse)
     p.luc_2010 = categories.categorize(p.LUD_2010);
     p.luc_2016 = categories.categorize(p.LUD_2016);
 
-    // Changes
-    p.ch20002005 = p.luc_2000 + '-' + p.luc_2005;
-    p.ch20002010 = p.luc_2000 + '-' + p.luc_2010;
-    p.ch20002016 = p.luc_2000 + '-' + p.luc_2016;
-    p.ch20052010 = p.luc_2005 + '-' + p.luc_2010;
-    p.ch20052016 = p.luc_2005 + '-' + p.luc_2016;
-    p.ch20102016 = p.luc_2010 + '-' + p.luc_2016;
+    // General category changes
+    p.ch20002005 = p.luc_2000 + '-->' + p.luc_2005;
+    p.ch20002010 = p.luc_2000 + '-->' + p.luc_2010;
+    p.ch20002016 = p.luc_2000 + '-->' + p.luc_2016;
+    p.ch20052010 = p.luc_2005 + '-->' + p.luc_2010;
+    p.ch20052016 = p.luc_2005 + '-->' + p.luc_2016;
+    p.ch20102016 = p.luc_2010 + '-->' + p.luc_2016;
+
+    // Specific category changes
+    p.cd20002005 = p.LUD_2000 + '-->' + p.LUD_2005;
+    p.cd20002010 = p.LUD_2000 + '-->' + p.LUD_2010;
+    p.cd20002016 = p.LUD_2000 + '-->' + p.LUD_2016;
+    p.cd20052010 = p.LUD_2005 + '-->' + p.LUD_2010;
+    p.cd20052016 = p.LUD_2005 + '-->' + p.LUD_2016;
+    p.cd20102016 = p.LUD_2010 + '-->' + p.LUD_2016;
 
     // Sub areas
     let county = countiesL[p.CO_ID];

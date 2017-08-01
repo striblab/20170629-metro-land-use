@@ -16,6 +16,9 @@ const argv = require('yargs').argv;
 if (!argv['land-use']) {
   throw new Error('--land-use required');
 }
+if (!argv.output) {
+  throw new Error('--output required');
+}
 
 // Load up data to match
 function inputJSON(i) {
@@ -27,7 +30,7 @@ const inventory = inputJSON(argv['land-use']);
 // Output csv
 const outputCSV = (name, data) => {
   data = _.map(data);
-  const dir = path.join(__dirname, '..', 'build', 'land-use-inventory-analysis-outputs');
+  const dir = argv.output[0] === '/' ? argv.output : path.join(process.cwd(), argv.output);
   mkdirp.sync(dir);
   fs.writeFileSync(path.join(dir, name), csv.format(data));
 };
@@ -77,21 +80,21 @@ const categoryChange = (filter, y1 = 2010, y2 = 2016, category = 'undeveloped') 
 table('Undeveloped by county 2010-2016', categoryChange('county'));
 table('Undeveloped by county 2005-2010', categoryChange('county', 2005, 2010));
 table('Undeveloped by county 2000-2005', categoryChange('county', 2000, 2005));
-table('Undeveloped by city (10000+ acres) 2010-2016', categoryChange((a) => {
-  return a.type === 'city' && a.acres >= 10000;
-}));
+// table('Undeveloped by city (10000+ acres) 2010-2016', categoryChange((a) => {
+//   return a.type === 'city' && a.acres >= 10000;
+// }));
 
 // Industrial change
-table('Industrial by county 2010-2016', categoryChange('county', 2010, 2016, 'industrial'));
-table('Industrial by city (10000+ acres) 2010-2016', categoryChange((a) => {
-  return a.type === 'city' && a.acres >= 10000;
-}, 2010, 2016, 'industrial'));
+// table('Industrial by county 2010-2016', categoryChange('county', 2010, 2016, 'industrial'));
+// table('Industrial by city (10000+ acres) 2010-2016', categoryChange((a) => {
+//   return a.type === 'city' && a.acres >= 10000;
+// }, 2010, 2016, 'industrial'));
 
 // Industrial change
-table('Residential (low density) by county 2010-2016', categoryChange('county', 2010, 2016, 'residential'));
-table('Residential (low density) by city (10000+ acres) 2010-2016', categoryChange((a) => {
-  return a.type === 'city' && a.acres >= 10000;
-}, 2010, 2016, 'residential'));
+// table('Residential (low density) by county 2010-2016', categoryChange('county', 2010, 2016, 'residential'));
+// table('Residential (low density) by city (10000+ acres) 2010-2016', categoryChange((a) => {
+//   return a.type === 'city' && a.acres >= 10000;
+// }, 2010, 2016, 'residential'));
 
 
 // All category changes by county

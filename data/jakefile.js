@@ -231,6 +231,26 @@ jakeConfig([
     ]
   },
 
+  // Export changed to shapefile for Carto
+  {
+    task: 'build/land-use-changed-2016.zip',
+    desc: 'Export changed 2016 land use data into shapefile.',
+    group: 'export',
+    commands: [
+      'mkdir -p build/land-use-changed-2016',
+      [
+        'ogr2ogr -F "ESRI Shapefile" "build/land-use-changed-2016/land-use-changed-2016.shp" ',
+        '"build/land-use-formatted.geo.json" ',
+        '-sql "SELECT LUD_2005, LUD_2010, LUD_2016, luc_2005, luc_2010, luc_2016, ch20102016',
+        'FROM OGRGeoJSON WHERE (luc_2016 <> luc_2010)"'
+      ],
+      'zip -r build/land-use-changed-2016.zip build/land-use-changed-2016/'
+    ],
+    deps: [
+      'build/land-use-formatted.geo.json',
+    ]
+  },
+
 
   // Land use aggregate for analysis
   {
@@ -256,8 +276,10 @@ jakeConfig([
     desc: 'Land use aggregate analysis.',
     group: 'analysis',
     commands: [
+      'rm -rv build/land-use-analysis-outputs/*',
       ['node ./lib/land-use-analysis.js ',
-        '--aggregates="build/land-use-aggregate.json" ']
+        '--aggregates="build/land-use-aggregate.json" ',
+        '--output="build/land-use-analysis-outputs"']
     ],
     deps: [
       'build/land-use-aggregate.json']
@@ -270,8 +292,10 @@ jakeConfig([
     desc: 'Combine land use and population data.',
     group: 'analysis',
     commands: [
+      'rm -rv build/land-use-inventory-analysis-outputs/*',
       ['node ./lib/land-use-inventory-analysis.js ',
-        '--land-use="build/land-use-inventories-combined.json" ']
+        '--land-use="build/land-use-inventories-combined.json" ',
+        '--output="build/land-use-inventory-analysis-outputs"']
     ],
     deps: [
       'build/land-use-inventories-combined.json']
