@@ -2,23 +2,22 @@
   "about this file": "This document defines configuration for this project that is not content or copy.",
   "styles": {
     "globals": [
-      "https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+      "https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/themes/css/cartodb.css"
     ]
   },
   "js": {
     "globals": [
       "https://cdnjs.cloudflare.com/ajax/libs/pym/1.2.2/pym.v1.min.js",
       "https://cdn.polyfill.io/v2/polyfill.min.js",
-      "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"
+      "https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js",
+      "https://code.jquery.com/jquery-3.2.1.min.js",
+      "https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/cartodb.js"
     ]
   },
   "social": {
     "image": "assets/images/strib/strib-logo-name-social-card.png"
   },
-  "googleAnalytics": "UA-XXXXXX-XX",
-  "content": {
-
-  },
+  "content": {},
   "publish": {
     "default": {
       "bucket": "static.startribune.com",
@@ -35,5 +34,6 @@
       "path": "projects/20170629-metro-land-use/",
       "url": "http://static.startribune.com/projects/20170629-metro-land-use/index.html"
     }
-  }
+  },
+  "publishToken": "1e8221999d9e505eddc622888ab56506"
 }

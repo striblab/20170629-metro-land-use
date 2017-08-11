@@ -1,0 +1,20 @@
+
+@color-res-2016: #984ea3;
+@color-res-dense-2016: #f781bf;
+@color-ind-2016: #ff7f00;
+@color-comm-2016: #377eb8;
+@color-park-2016: #4daf4a;
+@color-mixed-2016: #a65628;
+@color-trans-2016: #ffff33;
+@color-oth-2016: #888888;
+@color-undeveloped-2016: #AAAAAA;
+
+
+#layer {
+  polygon-fill: @color-oth-2016;
+  line-width: 0;
+  line-color: #FFFFFF;
+  line-opacity: 1;
+
+  polygon-fill: ramp([luc_2016], (@color-res-2016, @color-res-dense-2016, @color-ind-2016, @color-comm-2016, @color-park-2016, @color-mixed-2016, @color-trans-2016, @color-oth-2016, @color-undeveloped-2016), ("residential", "residential-dense", "industrial", "commercial", "park", "mixed", "transportation", "other", "undeveloped"), "=");
+}

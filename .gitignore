@@ -15,7 +15,7 @@ data/build/*
 
 # SQL scripts exceptions
 *.sql
-!data/lib/*.sql
+!data/lib/land-use-processing.sql
 
 
 # Common
