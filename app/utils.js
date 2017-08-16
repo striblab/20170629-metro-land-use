@@ -21,6 +21,9 @@ class Util {
     // Read in query params
     this.parseQuery();
 
+    // Read page
+    this.parsePage();
+
     // Smoothscroll polyyfill
     //smoothscroll.polyfill();
 
@@ -38,6 +41,14 @@ class Util {
     if (this.query.pym && this.query.pym === 'true') {
       this.options.pym = true;
     }
+  }
+
+  // Parse page
+  parsePage() {
+    this.page = window.location.pathname ?
+      (window.location.pathname === '/' ? 'index' :
+        window.location.pathname.replace(/\//g, '').replace(/\.html/g, '')) :
+      undefined;
   }
 
   // Super basic deep clone

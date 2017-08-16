@@ -1,0 +1,25 @@
+<%
+  content = content || {};
+  content.title = "See the changes from 2010 to 2016";
+  content.description = "The map below shows aerial imagery in the Twin Cities metro area. The left side is from 2010 and the right from 2016."
+%>
+
+@@include('./_base-top.ejs.html')
+
+<!-- Header -->
+<header class="project-header" role="banner">
+  <h1><%= content.title %></h1>
+
+  <p><%= content.description %></p>
+</header>
+
+<!-- Main content here -->
+<main id="main-content" class="content fullscreen fullscreen-minus-header fullscreen-minus-footer" role="main">
+  <div id="map" class="fullscreen"></div>
+</main>
+
+<!-- Footer -->
+<footer role="contentinfo">
+</footer>
+
+@@include('./_base-bottom.ejs.html')

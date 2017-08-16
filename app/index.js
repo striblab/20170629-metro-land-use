@@ -2,11 +2,12 @@
  * Main JS file for project.
  */
 
-/* global $, _, cartodb */
+/* global $, _, cartodb, L */
 'use strict';
 
 // Dependencies
 import utilsFn from './utils.js';
+import sideBySide from './leaflet-side-by-side.js';
 
 // Setup utils function
 let utils = utilsFn({ });
@@ -19,12 +20,38 @@ if (utils.query.flush) {
   $('body').addClass('flush');
 }
 
-// Get info
-let defaultMapConfig = 'http://alan-strib.carto.com/api/v2/viz/804d8a61-85b2-4b58-8e07-aa014702698b/viz.json';
-drawMap(defaultMapConfig);
+// Depending on page
+$('body').addClass(utils.page);
+if (utils.page === 'aerial') {
+  drawAerial();
+}
+else {
+  drawLandChange();
+}
 
-// Draw map
-function drawMap(config) {
+
+// Draw aerial map
+function drawAerial() {
+  let map = L.map('map', {
+    center: [ 45.051646, -93.473078 ],
+    zoom: 17,
+    maxZoom: 18,
+    minZoom: 10
+  });
+  let aerial16 = L.tileLayer.wms('http://geoint.lmic.state.mn.us/cgi-bin/wmsll', {
+    layers: 'met16'
+  }).addTo(map);
+  let aerial10 = L.tileLayer.wms('http://geoint.lmic.state.mn.us/cgi-bin/wmsll', {
+    layers: 'met10'
+  }).addTo(map);
+
+  L.control.sideBySide(aerial10, aerial16).addTo(map);
+}
+
+
+// Draw land chane map
+function drawLandChange() {
+  let config = 'http://alan-strib.carto.com/api/v2/viz/804d8a61-85b2-4b58-8e07-aa014702698b/viz.json';
   let options = {
     shareable: false,
     title: false,

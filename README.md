@@ -6,6 +6,7 @@ Analysis and visual for metro land use.
 ## Data
 
 * Land use data for the Twin Cities metro area on [MN Geospatial Commons](https://gisdata.mn.gov/dataset/us-mn-state-metc-plan-generl-lnduse-historical).
+    * [Details about the data](ftp://ftp.gisdata.mn.gov/pub/gdrs/data/pub/us_mn_state_metc/plan_generl_lnduse_historical/metadata/metadata.html)
 * Counties and population by race via [Census Reporter](https://censusreporter.org/data/table/?table=B03002&geo_ids=050|04000US27).
 * Cities and population by race via [Census Reporter](https://censusreporter.org/data/table/?table=B03002&geo_ids=060|04000US27).
     * NOTE: The Census cities (sub-county) area is slightly different from what is defined as a [CTU for the metro area](https://gisdata.mn.gov/dataset/us-mn-state-metc-bdry-census2010counties-ctus).
