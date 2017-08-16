@@ -32,6 +32,22 @@ header.project-header {
   background-color: #DEDEDE;
 }
 
+.map-split-label {
+  position: absolute;
+  z-index: 999999;
+  bottom: 1em;
+  padding: 0.15em 0.85em;
+  background-color: #FFFFFF;
+
+  &.map-split-label-left {
+    left: 1em;
+  }
+
+  &.map-split-label-right {
+    right: 1em;
+  }
+}
+
 .fullscreen {
   position: absolute;
   top: 0;

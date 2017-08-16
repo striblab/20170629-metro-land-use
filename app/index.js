@@ -20,6 +20,11 @@ if (utils.query.flush) {
   $('body').addClass('flush');
 }
 
+// Handle title change
+if (utils.query.title) {
+  $('header h1').text(utils.query.title);
+}
+
 // Depending on page
 $('body').addClass(utils.page);
 if (utils.page === 'aerial') {
@@ -33,8 +38,10 @@ else {
 // Draw aerial map
 function drawAerial() {
   let map = L.map('map', {
-    center: [ 45.051646, -93.473078 ],
-    zoom: 17,
+    center: [
+      utils.query.lat ? parseFloat(utils.query.lat) : 45.051646,
+      utils.query.lng ? parseFloat(utils.query.lng) : -93.473078 ],
+    zoom: utils.query.zoom ? parseInt(utils.query.zoom, 10) : 17,
     maxZoom: 18,
     minZoom: 10
   });
@@ -51,16 +58,16 @@ function drawAerial() {
 
 // Draw land chane map
 function drawLandChange() {
-  let config = 'http://alan-strib.carto.com/api/v2/viz/804d8a61-85b2-4b58-8e07-aa014702698b/viz.json';
+  let config = 'https://alan-strib.carto.com/api/v2/viz/804d8a61-85b2-4b58-8e07-aa014702698b/viz.json';
   let options = {
     shareable: false,
     title: false,
     description: false,
     search: false,
     cartodb_logo: false,
-    center_lat: 44.9463334,
-    center_lon: -93.1365967,
-    zoom: 10,
+    center_lat: utils.query.lat ? parseFloat(utils.query.lat) : 44.9463334,
+    center_lon: utils.query.lng ? parseFloat(utils.query.lng) : -93.1365967,
+    zoom: utils.query.zoom ? parseInt(utils.query.zoom, 10) : 10,
     legends: true,
     fullscreen: true,
   };

@@ -45,10 +45,8 @@ class Util {
 
   // Parse page
   parsePage() {
-    this.page = window.location.pathname ?
-      (window.location.pathname === '/' ? 'index' :
-        window.location.pathname.replace(/\//g, '').replace(/\.html/g, '')) :
-      undefined;
+    let paths = window.location.pathname ? window.location.pathname.split('/') : [];
+    this.page = paths.slice(-1)[0] ? paths.slice(-1)[0].split('.')[0] : 'index';
   }
 
   // Super basic deep clone
