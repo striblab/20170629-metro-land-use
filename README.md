@@ -26,8 +26,17 @@ Analysis and visual for metro land use.
 The project is designed to be a full page, linkable piece, as well as an embed.  The best way to embed the piece is with the following code:
 
 ```html
-<div data-pym-src="https://example.com/20170629-metro-land-use">Loading...</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pym/1.1.2/pym.v1.min.js" type="text/javascript"></script>
+<style type="text/css">
+  .dataframe { height:840px; }
+  @media only screen and (min-width: 200px) and (max-width: 900px) {
+    .dataframe { height:870px; }
+  }
+  .l-article-topper, .l-article-body {width:880px !important; }
+  .l-section-inner { border-right:none !important }
+</style>
+
+<div data-pym-src="https://s3.amazonaws.com/stribtest-bucket/projects/20170629-metro-land-use/index.html">Loading...</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pym/1.3.1/pym.v1.min.js" type="text/javascript"></script>
 ```
 
 ## Development

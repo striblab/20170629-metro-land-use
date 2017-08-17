@@ -29,8 +29,38 @@ class Util {
 
     // Enable pym
     if (this.options.pym) {
-      this.pym = !_.isUndefined(window.pym) ? new pym.Child({ polling: 500 }) : undefined;
+      this.loadPym();
     }
+  }
+
+  // Load pym
+  loadPym() {
+    this.pym = !_.isUndefined(window.pym) ? new pym.Child({ polling: 500 }) : undefined;
+    if (!this.pym) {
+      return false;
+    }
+
+    // Parse out parent info
+    this.pym.onMessage('viewport-iframe-position', (parentInfo) => {
+      // Viewport width, Viewport height, Iframe top, left, bottom, and right positions
+      parentInfo = parentInfo.split(' ').map((i) => {
+        return parseFloat(i);
+      });
+      parentInfo = {
+        width: parentInfo[0],
+        height: parentInfo[1],
+        containerTop: parentInfo[2],
+        containerLeft: parentInfo[3],
+        containerBottom: parentInfo[4],
+        containerRight: parentInfo[5],
+        containerHeight: parentInfo[4] - parentInfo[2],
+        containerWidth: parentInfo[5] - parentInfo[3]
+      };
+
+      this.parent = parentInfo;
+      this.trigger('parent', parentInfo);
+    });
+    this.pym.getParentPositionInfo();
   }
 
   // Get query params and adjust as needed
@@ -135,6 +165,28 @@ class Util {
       window.ga('set', 'page', path);
       window.ga('send', 'pageview');
     }
+  }
+
+  // Simple event handling
+  on(name, handler) {
+    if (!_.isFunction(handler)) {
+      return false;
+    }
+
+    this.eventHandlers = this.eventHandlers || {};
+    this.eventHandlers[name] = this.eventHandlers[name] || [];
+    this.eventHandlers[name].push(handler);
+    return handler;
+  }
+
+  trigger(name, data) {
+    if (!this.eventHandlers || !this.eventHandlers[name]) {
+      return false;
+    }
+
+    this.eventHandlers[name].forEach((h) => {
+      h.call(this, data);
+    });
   }
 }
 

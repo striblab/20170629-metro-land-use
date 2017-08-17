@@ -25,7 +25,20 @@ if (utils.query.title) {
   $('header h1').text(utils.query.title);
 }
 
-// Depending on page
+// Handling parent change
+utils.on('parent', (parentInfo) => {
+  if (!parentInfo.height || !parentInfo.containerWidth) {
+    return;
+  }
+
+  // Calculate height based on parent continer
+  let header = $('header').outerHeight(true) || 0;
+  let footer = $('footer').outerHeight(true) || 0;
+  let ideal = Math.min(parentInfo.height * 0.90, parentInfo.containerWidth);
+  $('body').height(header + footer + ideal);
+});
+
+// Depending on page, do specific things
 $('body').addClass(utils.page);
 if (utils.page === 'aerial') {
   drawAerial();
