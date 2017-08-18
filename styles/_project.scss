@@ -5,20 +5,22 @@
 body {
   min-height: 500px;
   height: auto;
-}
-
-footer {
-  display: none;
+  width: auto;
 }
 
 header.project-header {
   margin: 0;
-  padding: 1em;
+  padding: 1em 1em 0em 1em;
   font-size: 0.85em;
   line-height: 1.15em;
+  @extend .cf;
 
   .flush & {
-    padding: 1em 0;
+    padding: 1em 0 0 0;
+  }
+
+  p {
+    margin-bottom: 1em;
   }
 
   h1 {
@@ -56,6 +58,14 @@ header.project-header {
   right: 0;
 }
 
+footer {
+  position: absolute;
+  bottom: 0;
+  font-size: 0.65em;
+  line-height: 1.45em;
+  padding: 0.5em 1em 1em 1em;
+}
+
 .cartodb-tooltip {
 
   .CDB-Tooltip {
@@ -65,8 +75,7 @@ header.project-header {
 }
 
 .legend {
-  margin-bottom: -0.85em;
-  padding: 0.5em 0;
+  margin-bottom: 0.25em;
 
   .legend-item {
     display: inline-block;

@@ -2,12 +2,13 @@
  * Utility functions.
  */
 
-/* global window, document, pym */
+/* global window, document */
 'use strict';
 
 // Dependencies
 import queryString from 'query-string';
 import _ from 'underscore';
+import pym from './pym-wrapper.js';
 //import smoothscroll from 'smoothscroll-polyfill';
 
 // Util class

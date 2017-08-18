@@ -35,8 +35,21 @@ The project is designed to be a full page, linkable piece, as well as an embed. 
   .l-section-inner { border-right:none !important }
 </style>
 
-<div data-pym-src="https://s3.amazonaws.com/stribtest-bucket/projects/20170629-metro-land-use/index.html">Loading...</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pym/1.3.1/pym.v1.min.js" type="text/javascript"></script>
+<div id="land-use-embed">Loading...</div>
+<script type="text/javascript">
+  (function(){ window.pym = undefined; })();
+</script>
+
+<script src="https://s3.amazonaws.com/stribtest-bucket/projects/20170629-metro-land-use/pym-wrapper.bundle.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+  (function(){
+    var pymParent = new pym.Parent(
+      "land-use-embed",
+      "https://s3.amazonaws.com/stribtest-bucket/projects/20170629-metro-land-use/index.html"
+    );
+  })();
+</script>
 ```
 
 ## Development

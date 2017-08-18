@@ -1,54 +1,60 @@
 /**
- * Main JS file for project.
+ * Leaflet plugin that makes a slider to compare
+ * different maps.
+ *
+ * Adapted from:
+ * https://github.com/digidem/leaflet-side-by-side
+ *
+ * To use Draggability, as using a range slider element
+ * did not work in IE, specifically because of the styling
+ * the slider parts.
+ * https://draggabilly.desandro.com/
  */
 
 /* global L */
 'use strict';
 
-var mapWasDragEnabled;
-var mapWasTapEnabled;
+// Dependencies
+import Draggabilly from 'draggabilly';
 
 // Leaflet v0.7 backwards compatibility
-function on (el, types, fn, context) {
+function on(el, types, fn, context) {
   types.split(' ').forEach(function (type) {
     L.DomEvent.on(el, type, fn, context);
   });
 }
 
 // Leaflet v0.7 backwards compatibility
-function off (el, types, fn, context) {
+function off(el, types, fn, context) {
   types.split(' ').forEach(function (type) {
     L.DomEvent.off(el, type, fn, context);
   });
 }
 
-function getRangeEvent (rangeInput) {
-  return 'oninput' in rangeInput ? 'input' : 'change';
+// General bind
+function bind(func, context) {
+  return (...args) => {
+    func.call(context, ...args);
+  };
 }
 
-function cancelMapDrag () {
-  mapWasDragEnabled = this._map.dragging.enabled();
-  mapWasTapEnabled = this._map.tap && this._map.tap.enabled();
+function cancelMapDrag() {
   this._map.dragging.disable();
-  this._map.tap && this._map.tap.disable();
+  //this._map.tap && this._map.tap.disable();
 }
 
-function uncancelMapDrag (e) {
+function uncancelMapDrag(e) {
   this._refocusOnMap(e);
-  if (mapWasDragEnabled) {
-    this._map.dragging.enable();
-  }
-  if (mapWasTapEnabled) {
-    this._map.tap.enable();
-  }
+  this._map.dragging.enable();
+  //this._map.tap && this._map.tap.enable();
 }
 
 // convert arg to an array - returns empty array if arg is undefined
-function asArray (arg) {
+function asArray(arg) {
   return (arg === 'undefined') ? [] : Array.isArray(arg) ? arg : [arg];
 }
 
-function noop () {
+function noop() {
   return;
 }
 
@@ -58,45 +64,51 @@ L.Control.SideBySide = L.Control.extend({
     padding: 0
   },
 
-  initialize: function (leftLayers, rightLayers, options) {
+  setPosition: noop,
+
+  includes: L.Mixin.Events,
+
+  initialize: function(leftLayers, rightLayers, options) {
     this.setLeftLayers(leftLayers);
     this.setRightLayers(rightLayers);
     L.setOptions(this, options);
   },
 
-  getPosition: function () {
-    var rangeValue = this._range.value;
-    var offset = (0.5 - rangeValue) * (2 * this.options.padding + this.options.thumbSize);
-    return this._map.getSize().x * rangeValue + offset;
+  getPosition: function() {
+    return this._dragger.position.x;
   },
 
-  setPosition: noop,
-
-  includes: L.Mixin.Events,
-
-  addTo: function (map) {
+  addTo: function(map) {
     this.remove();
     this._map = map;
 
-    var container = this._container = L.DomUtil.create('div', 'leaflet-sbs', map._controlContainer);
+    // Create own container on leaflet
+    this._container = this._container = L.DomUtil.create('div', 'leaflet-sbs', map._controlContainer);
 
-    this._divider = L.DomUtil.create('div', 'leaflet-sbs-divider', container);
-    var range = this._range = L.DomUtil.create('input', 'leaflet-sbs-range', container);
-    range.type = 'range';
-    range.min = 0;
-    range.max = 1;
-    range.step = 'any';
-    range.value = 0.5;
-    range.style.paddingLeft = range.style.paddingRight = this.options.padding + 'px';
+    // Create the divider and thumb
+    this._divider = L.DomUtil.create('div', 'leaflet-sbs-divider', this._container);
+    this._thumb = L.DomUtil.create('div', 'leaflet-sbs-thumb', this._divider);
+
+
+    // Make divider draggable
+    this._dragger = new Draggabilly(this._divider, {
+      axis: 'x',
+      containment: this._container
+    });
+
     this._addEvents();
     this._updateLayers();
     return this;
   },
 
-  remove: function () {
+  remove: function() {
     if (!this._map) {
       return this;
     }
+    if (this._dragger) {
+      this._dragger.destroy();
+    }
+
     this._removeEvents();
     L.DomUtil.remove(this._container);
 
@@ -105,37 +117,39 @@ L.Control.SideBySide = L.Control.extend({
     return this;
   },
 
-  setLeftLayers: function (leftLayers) {
+  setLeftLayers: function(leftLayers) {
     this._leftLayers = asArray(leftLayers);
     this._updateLayers();
     return this;
   },
 
-  setRightLayers: function (rightLayers) {
+  setRightLayers: function(rightLayers) {
     this._rightLayers = asArray(rightLayers);
     this._updateLayers();
     return this;
   },
 
-  _updateClip: function () {
+  _updateClip: function() {
     var map = this._map;
     var nw = map.containerPointToLayerPoint([0, 0]);
     var se = map.containerPointToLayerPoint(map.getSize());
     var clipX = nw.x + this.getPosition();
     var dividerX = this.getPosition();
 
-    this._divider.style.left = dividerX + 'px';
-    this.fire('dividermove', {x: dividerX});
+    this.fire('dividermove', { x: dividerX });
     var clipLeft = 'rect(' + [nw.y, clipX, se.y, nw.x].join('px,') + 'px)';
     var clipRight = 'rect(' + [nw.y, se.x, se.y, clipX].join('px,') + 'px)';
-    if (this._leftLayer) {
-      this._leftLayer.getContainer().style.clip = clipLeft;
-    }
-    if (this._rightLayer) {
-      this._rightLayer.getContainer().style.clip = clipRight;
-    }
+
+    // Update each layer
+    this._leftLayers.forEach((l) => {
+      l.getContainer().style.clip = clipLeft;
+    });
+    this._rightLayers.forEach((l) => {
+      l.getContainer().style.clip = clipRight;
+    });
   },
 
+  // Assigns
   _updateLayers: function () {
     if (!this._map) {
       return this;
@@ -143,20 +157,24 @@ L.Control.SideBySide = L.Control.extend({
     var prevLeft = this._leftLayer;
     var prevRight = this._rightLayer;
     this._leftLayer = this._rightLayer = null;
+
     this._leftLayers.forEach(function (layer) {
       if (this._map.hasLayer(layer)) {
         this._leftLayer = layer;
       }
     }, this);
+
     this._rightLayers.forEach(function (layer) {
       if (this._map.hasLayer(layer)) {
         this._rightLayer = layer;
       }
     }, this);
+
     if (prevLeft !== this._leftLayer) {
       prevLeft && this.fire('leftlayerremove', {layer: prevLeft});
       this._leftLayer && this.fire('leftlayeradd', {layer: this._leftLayer});
     }
+
     if (prevRight !== this._rightLayer) {
       prevRight && this.fire('rightlayerremove', {layer: prevRight});
       this._rightLayer && this.fire('rightlayeradd', {layer: this._rightLayer});
@@ -165,28 +183,27 @@ L.Control.SideBySide = L.Control.extend({
   },
 
   _addEvents: function () {
-    var range = this._range;
-    var map = this._map;
-    if (!map || !range) return;
-    map.on('move', this._updateClip, this);
-    map.on('layeradd layerremove', this._updateLayers, this);
-    on(range, getRangeEvent(range), this._updateClip, this);
-    on(range, 'mousedown touchstart', cancelMapDrag, this);
-    on(range, 'mouseup touchend', uncancelMapDrag, this);
+    if (!this._map || !this._dragger) {
+      return;
+    }
+
+    // Map events
+    this._map.on('move', this._updateClip, this);
+    this._map.on('layeradd layerremove', this._updateLayers, this);
+
+    // Slider events
+    this._dragger.on('dragMove', bind(this._updateClip, this));
+
+    // Turn on/off dragging on map
+    this._dragger.on('dragStart', bind(cancelMapDrag, this));
+    on(this._thumb, 'mouseover touchstart', cancelMapDrag, this);
+
+    this._dragger.on('dragEnd', bind(uncancelMapDrag, this));
+    on(this._thumb, 'mouseup touchend', cancelMapDrag, this);
   },
 
   _removeEvents: function () {
-    var range = this._range;
-    var map = this._map;
-    if (range) {
-      off(range, getRangeEvent(range), this._updateClip, this);
-      off(range, 'mousedown touchstart', cancelMapDrag, this);
-      off(range, 'mouseup touchend', uncancelMapDrag, this);
-    }
-    if (map) {
-      map.off('layeradd layerremove', this._updateLayers, this);
-      map.off('move', this._updateClip, this);
-    }
+
   }
 });
 

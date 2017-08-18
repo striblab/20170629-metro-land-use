@@ -7,10 +7,13 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
   devtool: 'source-map',
-  entry: './app/index.js',
+  entry: {
+    app: './app/index.js',
+    'pym-wrapper': './app/pym-wrapper.js'
+  },
   output: {
     path: path.resolve(__dirname, './build'),
-    filename: 'app.bundle.js'
+    filename: '[name].bundle.js'
   },
   module: {
     rules: [

@@ -7,7 +7,10 @@
 
 // Dependencies
 import utilsFn from './utils.js';
+/* eslint-disable */
 import sideBySide from './leaflet-side-by-side.js';
+import leafletHash from 'leaflet-hash';
+/* eslint-enable */
 
 // Setup utils function
 let utils = utilsFn({ });
@@ -34,7 +37,7 @@ utils.on('parent', (parentInfo) => {
   // Calculate height based on parent continer
   let header = $('header').outerHeight(true) || 0;
   let footer = $('footer').outerHeight(true) || 0;
-  let ideal = Math.min(parentInfo.height * 0.90, parentInfo.containerWidth);
+  let ideal = Math.min(parentInfo.height * 0.85, parentInfo.containerWidth * 1.25);
   $('body').height(header + footer + ideal);
 });
 
@@ -56,8 +59,13 @@ function drawAerial() {
       utils.query.lng ? parseFloat(utils.query.lng) : -93.473078 ],
     zoom: utils.query.zoom ? parseInt(utils.query.zoom, 10) : 17,
     maxZoom: 18,
-    minZoom: 10
+    minZoom: 10,
+    attributionControl: false
   });
+
+  map.hash = new L.Hash(map);
+  utils.pym.hashRequest();
+
   let aerial16 = L.tileLayer.wms('http://geoint.lmic.state.mn.us/cgi-bin/wmsll', {
     layers: 'met16'
   }).addTo(map);
@@ -66,6 +74,9 @@ function drawAerial() {
   }).addTo(map);
 
   L.control.sideBySide(aerial10, aerial16).addTo(map);
+
+  let labels = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png');
+  labels.addTo(map);
 }
 
 
@@ -82,13 +93,20 @@ function drawLandChange() {
     center_lon: utils.query.lng ? parseFloat(utils.query.lng) : -93.1365967,
     zoom: utils.query.zoom ? parseInt(utils.query.zoom, 10) : 10,
     legends: true,
-    fullscreen: true,
+    fullscreen: true
   };
 
   cartodb.createVis('map', config, options)
     .done((carto, layers) => {
       let visual = layers[1];
-      window.map = carto.getNativeMap();
+      let map = carto.getNativeMap();
+
+      // Remove attribution to be placed somewhere else
+      map.removeControl(map.attributionControl);
+
+      // Set up hash and try to get from parent
+      map.hash = new L.Hash(map);
+      utils.pym.hashRequest();
 
       visual.setInteractivity('lud_2010, lud_2016');
       //visual.setQuery('SELECT * FROM land_use_changed_2016 WHERE ch20102016 = \'residential-->industrial\'');
@@ -106,7 +124,7 @@ function fullscreen() {
 }
 let throttledFullscreen = _.throttle(fullscreen, 200);
 $(window).on('resize', throttledFullscreen);
-throttledFullscreen();
+$(document).ready(throttledFullscreen);
 
 // Handle error
 function error(e) {
