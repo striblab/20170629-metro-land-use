@@ -30,6 +30,7 @@ let landUseOptions = {
   legends: true,
   fullscreen: true
 };
+let landUseInteractivityFields = 'lud_2010, lud_2016';
 
 
 // Add some classes depending on what is going on
@@ -82,7 +83,7 @@ function drawBoth() {
       cartodb.createVis('map', landUseURL, landUseOptions)
         .done((carto, cartoLayers) => {
           let visual = cartoLayers[1];
-          visual.setInteractivity('lud_2010, lud_2016');
+          visual.setInteractivity(landUseInteractivityFields);
           layers.landUse = L.layerGroup(cartoLayers);
           map = carto.getNativeMap();
 
@@ -123,6 +124,7 @@ function drawBoth() {
           l.setZIndex(-999999);
           l.setOpacity(0);
         });
+        layers.landUse.getLayers()[1].setInteractivity('');
       }
       if (layers.aerial) {
         layers.aerial.eachLayer((l) => {
@@ -149,6 +151,7 @@ function drawBoth() {
           l.setZIndex(999999);
           l.setOpacity(1);
         });
+        layers.landUse.getLayers()[1].setInteractivity(landUseInteractivityFields);
       }
 
       if (map.sideBySide && map.sideBySide._map) {
@@ -236,7 +239,7 @@ function drawLandChange() {
       map.hash = new L.Hash(map);
       utils.pym.hashRequest();
 
-      visual.setInteractivity('lud_2010, lud_2016');
+      visual.setInteractivity(landUseInteractivityFields);
       //visual.setQuery('SELECT * FROM land_use_changed_2016 WHERE ch20102016 = \'residential-->industrial\'');
     })
     .on('error', error);
