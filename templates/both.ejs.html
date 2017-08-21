@@ -1,0 +1,39 @@
+<%
+  content = content || {};
+  content.title = "See the changes from 2010 to 2016";
+  content.description = "The map below shows aerial imagery in the Twin Cities metro area. The left side is from 2010 and the right from 2016."
+%>
+
+@@include('./_base-top.ejs.html')
+
+<!-- Header -->
+<header class="project-header" role="banner">
+  <div class="views">
+    <a href="#" class="view active" data-view="land-use">Land use</a>
+    <a href="#" class="view" data-view="aerial">Aerial imagery</a>
+  </div>
+
+  <div class="aerial-only">
+    <p>The map below shows aerial imagery in the Twin Cities metro area. The left side is from 2010 and the right from 2016.</p>
+  </div>
+
+  <div class="land-use-only">
+    <p>The map below shows how land-use in the Twin Cities metro area has changed from 2010 to 2016 and colored according to the general category of land-use.</p>
+  </div>
+</header>
+
+<!-- Main content here -->
+<main id="main-content" class="content fullscreen fullscreen-minus-header fullscreen-minus-footer" role="main">
+  <div class="aerial-only map-split-label map-split-label-left">2010</div>
+  <div class="aerial-only map-split-label map-split-label-right">2016</div>
+
+  <div id="map" class="fullscreen"></div>
+</main>
+
+<!-- Footer -->
+<footer role="contentinfo">
+  Land use data and details about designations from the <a  target="_blank" rel="noopener" href="https://gisdata.mn.gov/dataset/us-mn-state-metc-plan-generl-lnduse-historical">Metropolitan Council</a>; note that changes in land use can reflect a change in designation and not necessarily an actual change in land use.
+  Aerial imagery from the <a  target="_blank" rel="noopener" href="http://www.mngeo.state.mn.us/chouse/wms/index.html">Minnesota Geospatial Information Office</a>.  Some map data provided by &copy;&nbsp;<a target="_blank" rel="noopener" href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> and &copy;&nbsp;<a target="_blank" rel="noopener"  href="https://carto.com/attribution">CARTO</a>.
+</footer>
+
+@@include('./_base-bottom.ejs.html')

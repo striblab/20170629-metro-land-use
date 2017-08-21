@@ -110,7 +110,12 @@ L.Control.SideBySide = L.Control.extend({
     }
 
     this._removeEvents();
-    L.DomUtil.remove(this._container);
+    if (L.DomUtil.remove) {
+      L.DomUtil.remove(this._container);
+    }
+    else if (this._container) {
+      this._container.remove();
+    }
 
     this._map = null;
 
@@ -203,7 +208,13 @@ L.Control.SideBySide = L.Control.extend({
   },
 
   _removeEvents: function () {
-
+    this._map.off('move', this._updateClip, this);
+    this._map.off('layeradd layerremove', this._updateLayers, this);
+    this._dragger.off('dragMove', bind(this._updateClip, this));
+    this._dragger.off('dragStart', bind(cancelMapDrag, this));
+    off(this._thumb, 'mouseover touchstart', cancelMapDrag, this);
+    this._dragger.off('dragEnd', bind(uncancelMapDrag, this));
+    off(this._thumb, 'mouseup touchend', cancelMapDrag, this);
   }
 });
 
