@@ -2,6 +2,7 @@
   "about this file": "This document defines configuration for this project that is not content or copy.",
   "styles": {
     "globals": [
+      "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css",
       "https://cartodb-libs.global.ssl.fastly.net/cartodb.js/v3/3.15/themes/css/cartodb.css"
     ]
   },

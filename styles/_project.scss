@@ -32,15 +32,22 @@ header.project-header {
   }
 }
 
+#map {
+  background-color: #DEDEDE;
+}
+
 .views {
   text-align: center;
   position: absolute;
   z-index: 999999;
   top: 0.75em;
   right: 0.75em;
+  background-color: #FFFFFF;
   background-color: rgba(255, 255, 255, 0.85);
   padding: 0.5em 1em;
+  border: 1px solid #999999;
   border-radius: 0.15em;
+  box-shadow: rgba(0,0,0,.2) 0 0 4px 2px;
 
   .view {
     font-size: 0.85em;
@@ -56,8 +63,80 @@ header.project-header {
   }
 }
 
-#map {
-  background-color: #DEDEDE;
+button {
+  border: none;
+  color: #FFFFFF;
+  padding: 0.5em 0.85em;
+  background-color: $color-strib-green-bg;
+  border-radius: 0.15em;
+  cursor: pointer;
+
+  &:hover {
+    background-color: lighten($color-strib-green-bg, 10);
+  }
+}
+
+.search-toggle {
+  text-align: center;
+  position: absolute;
+  z-index: 999999;
+  top: 0.75em;
+  right: 15.5em;
+  background: transparent;
+  padding-top: 0.5em;
+
+  button {
+    font-size: 0.85em;
+  }
+
+  &.opened {
+    .to-close {
+      display: inline-block;
+    }
+    .to-open {
+      display: none;
+    }
+  }
+
+  &.closed {
+    .to-open {
+      display: inline-block;
+    }
+    .to-close {
+      display: none;
+    }
+  }
+}
+
+.search-bar {
+  text-align: center;
+  position: absolute;
+  z-index: 999999;
+  width: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.85);
+  border-top: 1px solid #999999;
+  border-bottom: 1px solid #999999;
+  box-shadow: rgba(0,0,0,.2) 0 0 4px 2px;
+  padding: 1em;
+  transition: width 1s ease-in-out;
+
+  &.closed {
+    display: none;
+  }
+
+  input {
+    background-color: transparent;
+    padding: 0.5em;
+    border: none;
+    border-bottom: 2px solid $color-text;
+  }
+
+  button {
+    margin-left: 0.5em;
+  }
 }
 
 .map-split-label {
