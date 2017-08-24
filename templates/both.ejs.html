@@ -10,11 +10,11 @@
 <header class="project-header" role="banner">
 
   <div class="aerial-only">
-    <p>The map below shows aerial imagery in the Twin Cities metro area. The left side is from 2010 and the right from 2016.</p>
+    <p>The map below shows aerial imagery in the Twin Cities metro area. The left side is from 2010 and the right from 2016.  Beware there are imperfections in the data, which reflects Metropolitan Council classifications. Some parcels shown as changing uses are corrections of past data. Read more about this below the map.</p>
   </div>
 
   <div class="land-use-only">
-    <p>The map below shows how land-use in the Twin Cities metro area has changed from 2010 to 2016 and colored according to the general category of land-use.</p>
+    <p>The map below shows how land-use in the Twin Cities metro area has changed from 2010 to 2016 and colored according to the general category of land-use.  Beware there are imperfections in the data, which reflects Metropolitan Council classifications. Some parcels shown as changing uses are corrections of past data. Read more about this below the map.</p>
 
     @@include('./_legend.ejs.html')
   </div>
@@ -28,7 +28,7 @@
   </div>
 
   <div class="search-toggle closed">
-    <button type="button" title="Search by address or use your current location">
+    <button type="button" class="search-toggle-action" title="Search by address or use your current location">
       <i class="fa fa-search to-open"></i>
       <i class="fa fa-close to-close"></i>
     </button>
@@ -39,6 +39,11 @@
       <input type="text" placeholder="Address or place" />
       <button type="submit">Search</button>
       <button type="button" class="geolocate" title="Use your location"><i class="fa fa-location-arrow"></i></button>
+
+      <button type="button" class="button-link search-toggle-action" title="Close search">
+        <i class="fa fa-search to-open"></i>
+        <i class="fa fa-close to-close"></i>
+      </button>
     </form>
   </div>
 

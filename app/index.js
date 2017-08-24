@@ -16,7 +16,7 @@ import leafletHash from 'leaflet-hash';
 let utils = utilsFn({ });
 
 // Some common variables
-let metroAreaView = [-93.1365967, 44.9463334, 10];
+let metroAreaView = [-93.3330, 44.9774, 10];
 let landUseURL = 'https://alan-strib.carto.com/api/v2/viz/804d8a61-85b2-4b58-8e07-aa014702698b/viz.json';
 let landUseOptions = {
   shareable: false,
@@ -164,70 +164,6 @@ function drawBoth() {
     if (map) {
       map.invalidateSize();
     }
-
-    // Handle search
-    let $searchToggle = $('.search-toggle');
-    let $searchToggleButton = $('.search-toggle button');
-    let $search = $('.search-bar');
-    let $searchForm = $('.search-bar form');
-    let $input = $('.search-bar input');
-    let $geolocate = $('.search-bar .geolocate');
-
-    // Geocode
-    function geocode(input) {
-      if (!input) {
-        return;
-      }
-
-      let url = 'https://search.mapzen.com/v1/search?' + [
-        'text=' + encodeURIComponent(input),
-        'boundary.rect.min_lon=-95.77',
-        'boundary.rect.max_lon=-91.04',
-        'boundary.rect.min_lat=43.46',
-        'boundary.rect.max_lat=46.46',
-        'api_key=mapzen-pGUThrG'
-      ].join('&');
-      window.fetch(url).then((response) => {
-        return response.json();
-      })
-        .then((response) => {
-          if (response && response.features && response.bbox && map) {
-            let b = response.bbox;
-            map.fitBounds([[b[1], b[0]], [b[3], b[2]]]);
-          }
-        })
-        .catch(error);
-    }
-
-    // Submit
-    $searchForm.on('submit', (e) => {
-      e.preventDefault();
-      geocode($input.val());
-    });
-
-    // Geolocate
-    $geolocate.on('click', (e) => {
-      e.preventDefault();
-      utils.geolocate((error, latLng) => {
-        map.setView(latLng, 16);
-      });
-    });
-
-    // Toggle
-    $searchToggleButton.on('click', (e) => {
-      e.preventDefault();
-      let opened = $searchToggle.hasClass('opened');
-
-      $searchToggle.removeClass(opened ? 'opened' : 'closed');
-      $searchToggle.addClass(opened ? 'closed' : 'opened');
-
-      $search.removeClass(opened ? 'opened' : 'closed');
-      $search.addClass(opened ? 'closed' : 'opened');
-
-      if (!opened) {
-        $input.focus();
-      }
-    });
   }
 
   // Handle change of views
@@ -258,6 +194,78 @@ function drawBoth() {
 
   // Force land use view
   $('.views .view[data-view="land-use"]').trigger('click');
+
+  // Handle search
+  let $searchToggle = $('.search-toggle');
+  let $searchToggleButton = $('.search-toggle-action');
+  let $search = $('.search-bar');
+  let $searchForm = $('.search-bar form');
+  let $input = $('.search-bar input');
+  let $geolocate = $('.search-bar .geolocate');
+
+  // Geocode
+  function geocode(input) {
+    if (!input) {
+      return;
+    }
+
+    isLoading();
+    let url = 'https://search.mapzen.com/v1/search?' + [
+      'text=' + encodeURIComponent(input),
+      'boundary.rect.min_lon=-95.77',
+      'boundary.rect.max_lon=-91.04',
+      'boundary.rect.min_lat=43.46',
+      'boundary.rect.max_lat=46.46',
+      'api_key=mapzen-pGUThrG'
+    ].join('&');
+    window.fetch(url).then((response) => {
+      return response.json();
+    })
+      .then((response) => {
+        if (response && response.features && response.bbox && map) {
+          let b = response.bbox;
+          map.fitBounds([[b[1], b[0]], [b[3], b[2]]]);
+        }
+
+        doneLoading();
+      })
+      .catch((e) => {
+        doneLoading();
+        error(e);
+      });
+  }
+
+  // Submit
+  $searchForm.on('submit', (e) => {
+    e.preventDefault();
+    geocode($input.val());
+  });
+
+  // Geolocate
+  $geolocate.on('click', (e) => {
+    e.preventDefault();
+    isLoading();
+    utils.geolocate((error, latLng) => {
+      map.setView(latLng, 16);
+      doneLoading();
+    });
+  });
+
+  // Toggle search dialog
+  $searchToggleButton.on('click', (e) => {
+    e.preventDefault();
+    let opened = $searchToggle.hasClass('opened');
+
+    $searchToggle.removeClass(opened ? 'opened' : 'closed');
+    $searchToggle.addClass(opened ? 'closed' : 'opened');
+
+    $search.removeClass(opened ? 'opened' : 'closed');
+    $search.addClass(opened ? 'closed' : 'opened');
+
+    if (!opened) {
+      $input.focus();
+    }
+  });
 }
 
 // Draw aerial map
@@ -308,6 +316,16 @@ function drawLandChange() {
     })
     .on('error', error);
 }
+
+
+// Using cartodb loader
+function isLoading() {
+  $('.cartodb-tiles-loader').css('opacity', 100);
+}
+function doneLoading() {
+  $('.cartodb-tiles-loader').css('opacity', 0);
+}
+
 
 // Handle fullscreen parts
 function fullscreen() {
