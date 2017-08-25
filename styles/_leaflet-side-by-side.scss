@@ -11,6 +11,7 @@
   width: 5px;
   background-color: #FFFFFF;
   pointer-events: none;
+  touch-action: none;
   -webkit-touch-callout: none;
   z-index: 999;
 }
@@ -28,6 +29,7 @@
   border-radius: 50%;
   z-index: 99;
   pointer-events: auto;
+  touch-action: auto;
   -webkit-touch-callout: auto;
   cursor: ew-resize;
   background-image: url("assets/images/range-icon.png");

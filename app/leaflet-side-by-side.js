@@ -38,17 +38,6 @@ function bind(func, context) {
   };
 }
 
-function cancelMapDrag() {
-  this._map.dragging.disable();
-  //this._map.tap && this._map.tap.disable();
-}
-
-function uncancelMapDrag(e) {
-  this._refocusOnMap(e);
-  this._map.dragging.enable();
-  //this._map.tap && this._map.tap.enable();
-}
-
 // convert arg to an array - returns empty array if arg is undefined
 function asArray(arg) {
   return (arg === 'undefined') ? [] : Array.isArray(arg) ? arg : [arg];
@@ -69,6 +58,11 @@ L.Control.SideBySide = L.Control.extend({
   includes: L.Mixin.Events,
 
   initialize: function(leftLayers, rightLayers, options) {
+    // Bind some mthods that are called via events
+    this._uncancelMapDrag = bind(this._uncancelMapDrag, this);
+    this._cancelMapDrag = bind(this._cancelMapDrag, this);
+    this._updateClip = bind(this._updateClip, this);
+
     this.setLeftLayers(leftLayers);
     this.setRightLayers(rightLayers);
     L.setOptions(this, options);
@@ -79,7 +73,10 @@ L.Control.SideBySide = L.Control.extend({
   },
 
   addTo: function(map) {
+    // reset if needed.
     this.remove();
+
+    // Attach map
     this._map = map;
 
     // Create own container on leaflet
@@ -88,7 +85,6 @@ L.Control.SideBySide = L.Control.extend({
     // Create the divider and thumb
     this._divider = L.DomUtil.create('div', 'leaflet-sbs-divider', this._container);
     this._thumb = L.DomUtil.create('div', 'leaflet-sbs-thumb', this._divider);
-
 
     // Make divider draggable
     this._dragger = new Draggabilly(this._divider, {
@@ -132,6 +128,22 @@ L.Control.SideBySide = L.Control.extend({
     this._rightLayers = asArray(rightLayers);
     this._updateLayers();
     return this;
+  },
+
+
+  _cancelMapDrag: function() {
+    this._map.dragging.disable();
+    if (this._map.tap && this._map.tap.disable) {
+      this._map.tap.disable();
+    }
+  },
+
+  _uncancelMapDrag: function(e) {
+    this._refocusOnMap(e);
+    this._map.dragging.enable();
+    if (this._map.tap && this._map.tap.enable) {
+      this._map.tap.enable();
+    }
   },
 
   _updateClip: function() {
@@ -197,24 +209,30 @@ L.Control.SideBySide = L.Control.extend({
     this._map.on('layeradd layerremove', this._updateLayers, this);
 
     // Slider events
-    this._dragger.on('dragMove', bind(this._updateClip, this));
+    this._dragger.on('dragMove', this._updateClip);
 
     // Turn on/off dragging on map
-    this._dragger.on('dragStart', bind(cancelMapDrag, this));
-    on(this._thumb, 'mouseover touchstart', cancelMapDrag, this);
+    this._cancelMapDrag();
+    this._dragger.on('dragStart', this._cancelMapDrag);
+    on(this._thumb, 'mouseover touchstart', this._cancelMapDrag, this);
 
-    this._dragger.on('dragEnd', bind(uncancelMapDrag, this));
-    on(this._thumb, 'mouseup touchend', cancelMapDrag, this);
+    this._dragger.on('dragEnd', this._uncancelMapDrag);
+    on(this._thumb, 'mouseup mouseout touchend', this._uncancelMapDrag, this);
   },
 
   _removeEvents: function () {
     this._map.off('move', this._updateClip, this);
     this._map.off('layeradd layerremove', this._updateLayers, this);
-    this._dragger.off('dragMove', bind(this._updateClip, this));
-    this._dragger.off('dragStart', bind(cancelMapDrag, this));
-    off(this._thumb, 'mouseover touchstart', cancelMapDrag, this);
-    this._dragger.off('dragEnd', bind(uncancelMapDrag, this));
-    off(this._thumb, 'mouseup touchend', cancelMapDrag, this);
+
+    if (this._dragger) {
+      this._dragger.off('dragMove', this._updateClip);
+      this._dragger.off('dragStart', this._cancelMapDrag);
+      this._dragger.off('dragEnd', this._uncancelMapDrag);
+    }
+    if (this._thumb) {
+      off(this._thumb, 'mouseover touchstart', this._cancelMapDrag, this);
+      off(this._thumb, 'mouseup mouseout touchend', this._cancelMapDrag, this);
+    }
   }
 });
 
