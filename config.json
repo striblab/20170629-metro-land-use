@@ -33,7 +33,8 @@
     "production": {
       "bucket": "static.startribune.com",
       "path": "projects/20170629-metro-land-use/",
-      "url": "http://static.startribune.com/projects/20170629-metro-land-use/index.html"
+      "url": "http://static.startribune.com/projects/20170629-metro-land-use/index.html",
+      "expirationSeconds": 3600
     }
   },
   "publishToken": "1e8221999d9e505eddc622888ab56506"

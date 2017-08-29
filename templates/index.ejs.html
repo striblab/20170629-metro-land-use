@@ -1,10 +1,16 @@
+<%
+  content = content || {};
+  content.title = 'Changing landscapes in the metro area from 2010 to 2016';
+  content.description = 'The map below shows land use in the Twin Cities metro area that had a designation change in 2016 different from 2010 and colored according to the new general category of land use.';
+%>
+
 @@include('./_base-top.ejs.html')
 
 <!-- Header -->
 <header class="project-header" role="banner">
   <h1><%= content.title %></h1>
 
-  <p>The map below shows how land-use in the Twin Cities metro area has changed from 2010 to 2016 and colored according to the general category of land-use.</p>
+  <p><%= content.description %></p>
 
   @@include('./_legend.ejs.html')
 </header>
@@ -16,7 +22,7 @@
 
 <!-- Footer -->
 <footer role="contentinfo">
-  Note that changes in land use can reflect a change in designation and not necessarily an actual change in land use.  Land use data and details about designations from the <a  target="_blank" rel="noopener" href="https://gisdata.mn.gov/dataset/us-mn-state-metc-plan-generl-lnduse-historical">Metropolitan Council</a>.  Some map data provided by &copy;&nbsp;<a target="_blank" rel="noopener" href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> and &copy;&nbsp;<a target="_blank" rel="noopener"  href="https://carto.com/attribution">CARTO</a>.
+  Note that change can reflect a change in designation by the Met Council and not necessarily an actual change in land use.  Land use data and details about designations from the <a target="_blank" rel="noopener" href="https://gisdata.mn.gov/dataset/us-mn-state-metc-plan-generl-lnduse-historical">Metropolitan Council</a>.  Additional analysis by the Star Tribune.  Some map data provided by &copy;&nbsp;<a target="_blank" rel="noopener" href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> and &copy;&nbsp;<a target="_blank" rel="noopener"  href="https://carto.com/attribution">CARTO</a>.
 </footer>
 
 @@include('./_base-bottom.ejs.html')
