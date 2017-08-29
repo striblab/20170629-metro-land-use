@@ -59,10 +59,12 @@ class MParent extends pym.Parent {
   // Change hash here on parent
   hashRecieve(hash) {
     if (history && history.pushState) {
-      history.pushState(null, null, hash ? '#' + hash :
-        window.location.pathname + window.location.search);
-    }
-    else {
+      history.pushState(
+        null,
+        null,
+        hash ? '#' + hash : window.location.pathname + window.location.search
+      );
+    } else {
       location.hash = '#' + hash;
     }
   }
@@ -90,10 +92,12 @@ class MChild extends pym.Child {
   // Change hash here on child
   hashRecieve(hash) {
     if (history && history.pushState) {
-      history.pushState(null, null, hash ? '#' + hash :
-        window.location.pathname + window.location.search);
-    }
-    else {
+      history.pushState(
+        null,
+        null,
+        hash ? '#' + hash : window.location.pathname + window.location.search
+      );
+    } else {
       location.hash = '#' + hash;
     }
   }

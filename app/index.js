@@ -13,11 +13,12 @@ import leafletHash from 'leaflet-hash';
 /* eslint-enable */
 
 // Setup utils function
-let utils = utilsFn({ });
+let utils = utilsFn({});
 
 // Some common variables
-let metroAreaView = [-93.3330, 44.9774, 10];
-let landUseURL = 'https://alan-strib.carto.com/api/v2/viz/804d8a61-85b2-4b58-8e07-aa014702698b/viz.json';
+let metroAreaView = [-93.333, 44.9774, 10];
+let landUseURL =
+  'https://alan-strib.carto.com/api/v2/viz/804d8a61-85b2-4b58-8e07-aa014702698b/viz.json';
 let landUseOptions = {
   shareable: false,
   title: false,
@@ -31,7 +32,6 @@ let landUseOptions = {
   fullscreen: true
 };
 let landUseInteractivityFields = 'lud_2010, lud_2016';
-
 
 // Add some classes depending on what is going on
 if (utils.isEmbedded()) {
@@ -47,7 +47,7 @@ if (utils.query.title) {
 }
 
 // Handling parent change
-utils.on('parent', (parentInfo) => {
+utils.on('parent', parentInfo => {
   if (!parentInfo.height || !parentInfo.containerWidth) {
     return;
   }
@@ -55,7 +55,10 @@ utils.on('parent', (parentInfo) => {
   // Calculate height based on parent continer
   let header = $('header').outerHeight(true) || 0;
   let footer = $('footer').outerHeight(true) || 0;
-  let ideal = Math.min(parentInfo.height * 0.85, parentInfo.containerWidth * 1.25);
+  let ideal = Math.min(
+    parentInfo.height * 0.85,
+    parentInfo.containerWidth * 1.25
+  );
   $('body').height(header + footer + ideal);
 });
 
@@ -63,11 +66,9 @@ utils.on('parent', (parentInfo) => {
 $('body').addClass(utils.page);
 if (utils.page === 'aerial') {
   drawAerial();
-}
-else if (utils.page === 'both') {
+} else if (utils.page === 'both') {
   drawBoth();
-}
-else {
+} else {
   drawLandChange();
 }
 
@@ -80,7 +81,8 @@ function drawBoth() {
   function drawMap(view) {
     // Create map if needed
     if (!map) {
-      cartodb.createVis('map', landUseURL, landUseOptions)
+      cartodb
+        .createVis('map', landUseURL, landUseOptions)
         .done((carto, cartoLayers) => {
           let visual = cartoLayers[1];
           visual.setInteractivity(landUseInteractivityFields);
@@ -100,15 +102,23 @@ function drawBoth() {
     // Create aerial layers if needed
     if (view === 'aerial' && !layers.aerial) {
       let l = [];
-      l.push(L.tileLayer.wms('http://geoint.lmic.state.mn.us/cgi-bin/wmsll', {
-        layers: 'met10',
-        id: 'aerial10'
-      }));
-      l.push(L.tileLayer.wms('http://geoint.lmic.state.mn.us/cgi-bin/wmsll', {
-        layers: 'met16',
-        id: 'aerial16'
-      }));
-      l.push(L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png'));
+      l.push(
+        L.tileLayer.wms('http://geoint.lmic.state.mn.us/cgi-bin/wmsll', {
+          layers: 'met10',
+          id: 'aerial10'
+        })
+      );
+      l.push(
+        L.tileLayer.wms('http://geoint.lmic.state.mn.us/cgi-bin/wmsll', {
+          layers: 'met16',
+          id: 'aerial16'
+        })
+      );
+      l.push(
+        L.tileLayer(
+          'http://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png'
+        )
+      );
 
       layers.aerial = L.layerGroup(l);
 
@@ -120,38 +130,47 @@ function drawBoth() {
 
     if (map && view === 'aerial') {
       if (layers.landUse) {
-        layers.landUse.eachLayer((l) => {
+        layers.landUse.eachLayer(l => {
           l.setZIndex(-999999);
           l.setOpacity(0);
         });
         layers.landUse.getLayers()[1].setInteractivity('');
       }
       if (layers.aerial) {
-        layers.aerial.eachLayer((l) => {
+        layers.aerial.eachLayer(l => {
           l.setZIndex(999999);
           l.setOpacity(1);
         });
       }
 
       layers.aerial.addTo(map);
-      map.sideBySide = map.sideBySide && map.sideBySide._map ? map.sideBySide :
-        L.control.sideBySide(layers.aerial.getLayers()[0], layers.aerial.getLayers()[1]).addTo(map);
+      map.sideBySide =
+        map.sideBySide && map.sideBySide._map
+          ? map.sideBySide
+          : L.control
+            .sideBySide(
+              layers.aerial.getLayers()[0],
+              layers.aerial.getLayers()[1]
+            )
+            .addTo(map);
     }
 
     // Land use map
     if (map && view === 'land-use') {
       if (layers.aerial) {
-        layers.aerial.eachLayer((l) => {
+        layers.aerial.eachLayer(l => {
           l.setZIndex(-999999);
           l.setOpacity(0);
         });
       }
       if (layers.landUse) {
-        layers.landUse.eachLayer((l) => {
+        layers.landUse.eachLayer(l => {
           l.setZIndex(999999);
           l.setOpacity(1);
         });
-        layers.landUse.getLayers()[1].setInteractivity(landUseInteractivityFields);
+        layers.landUse
+          .getLayers()[1]
+          .setInteractivity(landUseInteractivityFields);
       }
 
       if (map.sideBySide && map.sideBySide._map) {
@@ -210,18 +229,22 @@ function drawBoth() {
     }
 
     isLoading();
-    let url = 'https://search.mapzen.com/v1/search?' + [
-      'text=' + encodeURIComponent(input),
-      'boundary.rect.min_lon=-95.77',
-      'boundary.rect.max_lon=-91.04',
-      'boundary.rect.min_lat=43.46',
-      'boundary.rect.max_lat=46.46',
-      'api_key=mapzen-pGUThrG'
-    ].join('&');
-    window.fetch(url).then((response) => {
-      return response.json();
-    })
-      .then((response) => {
+    let url =
+      'https://search.mapzen.com/v1/search?' +
+      [
+        'text=' + encodeURIComponent(input),
+        'boundary.rect.min_lon=-95.77',
+        'boundary.rect.max_lon=-91.04',
+        'boundary.rect.min_lat=43.46',
+        'boundary.rect.max_lat=46.46',
+        'api_key=mapzen-pGUThrG'
+      ].join('&');
+    window
+      .fetch(url)
+      .then(response => {
+        return response.json();
+      })
+      .then(response => {
         if (response && response.features && response.bbox && map) {
           let b = response.bbox;
           map.fitBounds([[b[1], b[0]], [b[3], b[2]]]);
@@ -229,20 +252,20 @@ function drawBoth() {
 
         doneLoading();
       })
-      .catch((e) => {
+      .catch(e => {
         doneLoading();
         error(e);
       });
   }
 
   // Submit
-  $searchForm.on('submit', (e) => {
+  $searchForm.on('submit', e => {
     e.preventDefault();
     geocode($input.val());
   });
 
   // Geolocate
-  $geolocate.on('click', (e) => {
+  $geolocate.on('click', e => {
     e.preventDefault();
     isLoading();
     utils.geolocate((error, latLng) => {
@@ -252,7 +275,7 @@ function drawBoth() {
   });
 
   // Toggle search dialog
-  $searchToggleButton.on('click', (e) => {
+  $searchToggleButton.on('click', e => {
     e.preventDefault();
     let opened = $searchToggle.hasClass('opened');
 
@@ -273,7 +296,8 @@ function drawAerial() {
   let map = L.map('map', {
     center: [
       utils.query.lat ? parseFloat(utils.query.lat) : 45.051646,
-      utils.query.lng ? parseFloat(utils.query.lng) : -93.473078 ],
+      utils.query.lng ? parseFloat(utils.query.lng) : -93.473078
+    ],
     zoom: utils.query.zoom ? parseInt(utils.query.zoom, 10) : 17,
     maxZoom: 18,
     minZoom: 10,
@@ -283,23 +307,29 @@ function drawAerial() {
   map.hash = new L.Hash(map);
   utils.pym.hashRequest();
 
-  let aerial16 = L.tileLayer.wms('http://geoint.lmic.state.mn.us/cgi-bin/wmsll', {
-    layers: 'met16'
-  }).addTo(map);
-  let aerial10 = L.tileLayer.wms('http://geoint.lmic.state.mn.us/cgi-bin/wmsll', {
-    layers: 'met10'
-  }).addTo(map);
+  let aerial16 = L.tileLayer
+    .wms('http://geoint.lmic.state.mn.us/cgi-bin/wmsll', {
+      layers: 'met16'
+    })
+    .addTo(map);
+  let aerial10 = L.tileLayer
+    .wms('http://geoint.lmic.state.mn.us/cgi-bin/wmsll', {
+      layers: 'met10'
+    })
+    .addTo(map);
 
   L.control.sideBySide(aerial10, aerial16).addTo(map);
 
-  let labels = L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png');
+  let labels = L.tileLayer(
+    'http://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png'
+  );
   labels.addTo(map);
 }
 
-
 // Draw land chane map
 function drawLandChange() {
-  cartodb.createVis('map', landUseURL, landUseOptions)
+  cartodb
+    .createVis('map', landUseURL, landUseOptions)
     .done((carto, layers) => {
       let visual = layers[1];
       let map = carto.getNativeMap();
@@ -317,7 +347,6 @@ function drawLandChange() {
     .on('error', error);
 }
 
-
 // Using cartodb loader
 function isLoading() {
   $('.cartodb-tiles-loader').css('opacity', 100);
@@ -325,7 +354,6 @@ function isLoading() {
 function doneLoading() {
   $('.cartodb-tiles-loader').css('opacity', 0);
 }
-
 
 // Handle fullscreen parts
 function fullscreen() {

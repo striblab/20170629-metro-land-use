@@ -19,14 +19,14 @@ import Draggabilly from 'draggabilly';
 
 // Leaflet v0.7 backwards compatibility
 function on(el, types, fn, context) {
-  types.split(' ').forEach(function (type) {
+  types.split(' ').forEach(function(type) {
     L.DomEvent.on(el, type, fn, context);
   });
 }
 
 // Leaflet v0.7 backwards compatibility
 function off(el, types, fn, context) {
-  types.split(' ').forEach(function (type) {
+  types.split(' ').forEach(function(type) {
     L.DomEvent.off(el, type, fn, context);
   });
 }
@@ -40,7 +40,7 @@ function bind(func, context) {
 
 // convert arg to an array - returns empty array if arg is undefined
 function asArray(arg) {
-  return (arg === 'undefined') ? [] : Array.isArray(arg) ? arg : [arg];
+  return arg === 'undefined' ? [] : Array.isArray(arg) ? arg : [arg];
 }
 
 function noop() {
@@ -80,10 +80,18 @@ L.Control.SideBySide = L.Control.extend({
     this._map = map;
 
     // Create own container on leaflet
-    this._container = this._container = L.DomUtil.create('div', 'leaflet-sbs', map._controlContainer);
+    this._container = this._container = L.DomUtil.create(
+      'div',
+      'leaflet-sbs',
+      map._controlContainer
+    );
 
     // Create the divider and thumb
-    this._divider = L.DomUtil.create('div', 'leaflet-sbs-divider', this._container);
+    this._divider = L.DomUtil.create(
+      'div',
+      'leaflet-sbs-divider',
+      this._container
+    );
     this._thumb = L.DomUtil.create('div', 'leaflet-sbs-thumb', this._divider);
 
     // Make divider draggable
@@ -108,8 +116,7 @@ L.Control.SideBySide = L.Control.extend({
     this._removeEvents();
     if (L.DomUtil.remove) {
       L.DomUtil.remove(this._container);
-    }
-    else if (this._container) {
+    } else if (this._container) {
       this._container.remove();
     }
 
@@ -129,7 +136,6 @@ L.Control.SideBySide = L.Control.extend({
     this._updateLayers();
     return this;
   },
-
 
   _cancelMapDrag: function() {
     this._map.dragging.disable();
@@ -158,16 +164,16 @@ L.Control.SideBySide = L.Control.extend({
     var clipRight = 'rect(' + [nw.y, se.x, se.y, clipX].join('px,') + 'px)';
 
     // Update each layer
-    this._leftLayers.forEach((l) => {
+    this._leftLayers.forEach(l => {
       l.getContainer().style.clip = clipLeft;
     });
-    this._rightLayers.forEach((l) => {
+    this._rightLayers.forEach(l => {
       l.getContainer().style.clip = clipRight;
     });
   },
 
   // Assigns
-  _updateLayers: function () {
+  _updateLayers: function() {
     if (!this._map) {
       return this;
     }
@@ -175,31 +181,32 @@ L.Control.SideBySide = L.Control.extend({
     var prevRight = this._rightLayer;
     this._leftLayer = this._rightLayer = null;
 
-    this._leftLayers.forEach(function (layer) {
+    this._leftLayers.forEach(function(layer) {
       if (this._map.hasLayer(layer)) {
         this._leftLayer = layer;
       }
     }, this);
 
-    this._rightLayers.forEach(function (layer) {
+    this._rightLayers.forEach(function(layer) {
       if (this._map.hasLayer(layer)) {
         this._rightLayer = layer;
       }
     }, this);
 
     if (prevLeft !== this._leftLayer) {
-      prevLeft && this.fire('leftlayerremove', {layer: prevLeft});
-      this._leftLayer && this.fire('leftlayeradd', {layer: this._leftLayer});
+      prevLeft && this.fire('leftlayerremove', { layer: prevLeft });
+      this._leftLayer && this.fire('leftlayeradd', { layer: this._leftLayer });
     }
 
     if (prevRight !== this._rightLayer) {
-      prevRight && this.fire('rightlayerremove', {layer: prevRight});
-      this._rightLayer && this.fire('rightlayeradd', {layer: this._rightLayer});
+      prevRight && this.fire('rightlayerremove', { layer: prevRight });
+      this._rightLayer &&
+        this.fire('rightlayeradd', { layer: this._rightLayer });
     }
     this._updateClip();
   },
 
-  _addEvents: function () {
+  _addEvents: function() {
     if (!this._map || !this._dragger) {
       return;
     }
@@ -220,7 +227,7 @@ L.Control.SideBySide = L.Control.extend({
     on(this._thumb, 'mouseup mouseout touchend', this._uncancelMapDrag, this);
   },
 
-  _removeEvents: function () {
+  _removeEvents: function() {
     this._map.off('move', this._updateClip, this);
     this._map.off('layeradd layerremove', this._updateLayers, this);
 
@@ -236,7 +243,7 @@ L.Control.SideBySide = L.Control.extend({
   }
 });
 
-L.control.sideBySide = function (leftLayers, rightLayers, options) {
+L.control.sideBySide = function(leftLayers, rightLayers, options) {
   return new L.Control.SideBySide(leftLayers, rightLayers, options);
 };
 

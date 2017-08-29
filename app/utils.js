@@ -36,15 +36,17 @@ class Util {
 
   // Load pym
   loadPym() {
-    this.pym = !_.isUndefined(window.pym) ? new pym.Child({ polling: 500 }) : undefined;
+    this.pym = !_.isUndefined(window.pym)
+      ? new pym.Child({ polling: 500 })
+      : undefined;
     if (!this.pym) {
       return false;
     }
 
     // Parse out parent info
-    this.pym.onMessage('viewport-iframe-position', (parentInfo) => {
+    this.pym.onMessage('viewport-iframe-position', parentInfo => {
       // Viewport width, Viewport height, Iframe top, left, bottom, and right positions
-      parentInfo = parentInfo.split(' ').map((i) => {
+      parentInfo = parentInfo.split(' ').map(i => {
         return parseFloat(i);
       });
       parentInfo = {
@@ -76,7 +78,9 @@ class Util {
 
   // Parse page
   parsePage() {
-    let paths = window.location.pathname ? window.location.pathname.split('/') : [];
+    let paths = window.location.pathname
+      ? window.location.pathname.split('/')
+      : [];
     this.page = paths.slice(-1)[0] ? paths.slice(-1)[0].split('.')[0] : 'index';
   }
 
@@ -93,8 +97,7 @@ class Util {
 
     try {
       this.embedded = window.self !== window.top;
-    }
-    catch(e) {
+    } catch (e) {
       this.embedded = true;
     }
 
@@ -111,8 +114,7 @@ class Util {
       window.localStorage.setItem('test', 'test');
       window.localStorage.removeItem('test');
       this.localStorage = true;
-    }
-    catch(e) {
+    } catch (e) {
       this.localStorage = false;
     }
 
@@ -121,28 +123,33 @@ class Util {
 
   // Check for geolocation
   hasGeolocate() {
-    return (window.navigator && 'geolocation' in window.navigator);
+    return window.navigator && 'geolocation' in window.navigator;
   }
 
   // Basic geolocation function
   geolocate(done) {
     if (this.hasGeolocate()) {
-      window.navigator.geolocation.getCurrentPosition((position) => {
-        done(null, { lat: position.coords.latitude, lng: position.coords.longitude });
-      }, () => {
-        done('Unable to find your position.');
-      });
-    }
-    else {
+      window.navigator.geolocation.getCurrentPosition(
+        position => {
+          done(null, {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        () => {
+          done('Unable to find your position.');
+        }
+      );
+    } else {
       done('Geolocation not available');
     }
   }
 
   // Scroll to id
   goTo(id) {
-    const el = _.isElement(id) ? id :
-      id[0] && _.isElement(id[0]) ? id[0] :
-        document.getElementById(id);
+    const el = _.isElement(id)
+      ? id
+      : id[0] && _.isElement(id[0]) ? id[0] : document.getElementById(id);
 
     if (!el) {
       return;
@@ -150,8 +157,7 @@ class Util {
 
     if (this.isEmbedded() && this.pym) {
       this.pym.scrollParentToChildEl(el);
-    }
-    else {
+    } else {
       el.scrollIntoView({ behavior: 'smooth' });
     }
   }
@@ -159,8 +165,11 @@ class Util {
   // Google analytics page update
   // https://developers.google.com/analytics/devguides/collection/analyticsjs/single-page-applications
   gaPageUpdate(path) {
-    path = path ? path : document.location.pathname +
-      document.location.search + document.location.hash;
+    path = path
+      ? path
+      : document.location.pathname +
+        document.location.search +
+        document.location.hash;
 
     if (window.ga) {
       window.ga('set', 'page', path);
@@ -185,13 +194,13 @@ class Util {
       return false;
     }
 
-    this.eventHandlers[name].forEach((h) => {
+    this.eventHandlers[name].forEach(h => {
       h.call(this, data);
     });
   }
 }
 
 // Export a generator for the class.
-export default (options) => {
+export default options => {
   return new Util(options);
 };
