@@ -102,6 +102,7 @@ L.Control.SideBySide = L.Control.extend({
 
     this._addEvents();
     this._updateLayers();
+    this._uncancelMapDrag();
     return this;
   },
 
@@ -116,7 +117,8 @@ L.Control.SideBySide = L.Control.extend({
     this._removeEvents();
     if (L.DomUtil.remove) {
       L.DomUtil.remove(this._container);
-    } else if (this._container) {
+    }
+    else if (this._container) {
       this._container.remove();
     }
 
@@ -145,11 +147,28 @@ L.Control.SideBySide = L.Control.extend({
   },
 
   _uncancelMapDrag: function(e) {
-    this._refocusOnMap(e);
+    if (!this._isEmbedded()) {
+      this._refocusOnMap(e);
+    }
     this._map.dragging.enable();
     if (this._map.tap && this._map.tap.enable) {
       this._map.tap.enable();
     }
+  },
+
+  _isEmbedded: function() {
+    if (this.embedded !== undefined) {
+      return this.embedded;
+    }
+
+    try {
+      this.embedded = window.self !== window.top;
+    }
+    catch (e) {
+      this.embedded = true;
+    }
+
+    return this.embedded;
   },
 
   _updateClip: function() {
@@ -221,7 +240,12 @@ L.Control.SideBySide = L.Control.extend({
     // Turn on/off dragging on map
     this._cancelMapDrag();
     this._dragger.on('dragStart', this._cancelMapDrag);
-    on(this._thumb, 'mouseover touchstart', this._cancelMapDrag, this);
+    on(
+      this._thumb,
+      'mousedown mouseover touchstart',
+      this._cancelMapDrag,
+      this
+    );
 
     this._dragger.on('dragEnd', this._uncancelMapDrag);
     on(this._thumb, 'mouseup mouseout touchend', this._uncancelMapDrag, this);
@@ -237,7 +261,12 @@ L.Control.SideBySide = L.Control.extend({
       this._dragger.off('dragEnd', this._uncancelMapDrag);
     }
     if (this._thumb) {
-      off(this._thumb, 'mouseover touchstart', this._cancelMapDrag, this);
+      off(
+        this._thumb,
+        'mousedown mouseover touchstart',
+        this._cancelMapDrag,
+        this
+      );
       off(this._thumb, 'mouseup mouseout touchend', this._cancelMapDrag, this);
     }
   }

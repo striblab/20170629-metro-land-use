@@ -97,7 +97,8 @@ class Util {
 
     try {
       this.embedded = window.self !== window.top;
-    } catch (e) {
+    }
+    catch (e) {
       this.embedded = true;
     }
 
@@ -114,7 +115,8 @@ class Util {
       window.localStorage.setItem('test', 'test');
       window.localStorage.removeItem('test');
       this.localStorage = true;
-    } catch (e) {
+    }
+    catch (e) {
       this.localStorage = false;
     }
 
@@ -140,7 +142,8 @@ class Util {
           done('Unable to find your position.');
         }
       );
-    } else {
+    }
+    else {
       done('Geolocation not available');
     }
   }
@@ -157,7 +160,8 @@ class Util {
 
     if (this.isEmbedded() && this.pym) {
       this.pym.scrollParentToChildEl(el);
-    } else {
+    }
+    else {
       el.scrollIntoView({ behavior: 'smooth' });
     }
   }

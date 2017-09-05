@@ -29,9 +29,21 @@ let landUseOptions = {
   center_lon: utils.query.lng ? parseFloat(utils.query.lng) : metroAreaView[0],
   zoom: utils.query.zoom ? parseInt(utils.query.zoom, 10) : metroAreaView[2],
   legends: true,
-  fullscreen: true
+  fullscreen: false
+  //fadeAnimation: false,
+  //keyboard: false
 };
 let landUseInteractivityFields = 'lud_2010, lud_2016';
+
+// For debugging
+window.L = L;
+L.Map.addInitHook(function() {
+  return L.DomEvent.off(
+    this._container,
+    'mousedown',
+    this.keyboard._onMouseDown
+  );
+});
 
 // Add some classes depending on what is going on
 if (utils.isEmbedded()) {
@@ -57,7 +69,7 @@ utils.on('parent', parentInfo => {
   let footer = $('footer').outerHeight(true) || 0;
   let ideal = Math.min(
     parentInfo.height * 0.85,
-    parentInfo.containerWidth * 1.25
+    parentInfo.containerWidth * 1.15
   );
   $('body').height(header + footer + ideal);
 });
@@ -66,9 +78,11 @@ utils.on('parent', parentInfo => {
 $('body').addClass(utils.page);
 if (utils.page === 'aerial') {
   drawAerial();
-} else if (utils.page === 'both') {
+}
+else if (utils.page === 'both') {
   drawBoth();
-} else {
+}
+else {
   drawLandChange();
 }
 
@@ -301,7 +315,8 @@ function drawAerial() {
     zoom: utils.query.zoom ? parseInt(utils.query.zoom, 10) : 17,
     maxZoom: 18,
     minZoom: 10,
-    attributionControl: false
+    attributionControl: false,
+    zoomControl: !(L.Browser.mobile && L.Browser.touch)
   });
 
   map.hash = new L.Hash(map);
@@ -366,6 +381,9 @@ function fullscreen() {
 let throttledFullscreen = _.throttle(fullscreen, 200);
 $(window).on('resize', throttledFullscreen);
 $(document).ready(throttledFullscreen);
+setTimeout(() => {
+  throttledFullscreen();
+}, 1500);
 
 // Handle error
 function error(e) {
