@@ -6,6 +6,7 @@
 'use strict';
 
 // Dependencies
+import queryString from 'query-string';
 import utilsFn from './utils.js';
 /* eslint-disable */
 import sideBySide from './leaflet-side-by-side.js';
@@ -384,6 +385,28 @@ $(document).ready(throttledFullscreen);
 setTimeout(() => {
   throttledFullscreen();
 }, 1500);
+
+// Handle share links
+function shareLinks() {
+  return false;
+
+  let h = window.location.href;
+
+  $('.twitter-link').each(function() {
+    let current = $(this).attr('href');
+    let prefix = current.split('?')[0];
+    let query = current.split('?')[1]
+      ? queryString.parse('?' + h.split('?')[1])
+      : {};
+
+    // NOT PARSING
+    query.url = h;
+    $(this).attr('href', prefix + '?' + queryString.stringify(query));
+  });
+}
+let throttledShareLinks = _.throttle(shareLinks, 200);
+window.addEventListener('hashchange', throttledShareLinks);
+$(document).ready(throttledShareLinks);
 
 // Handle error
 function error(e) {

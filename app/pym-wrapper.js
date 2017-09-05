@@ -64,7 +64,8 @@ class MParent extends pym.Parent {
         null,
         hash ? '#' + hash : window.location.pathname + window.location.search
       );
-    } else {
+    }
+    else {
       location.hash = '#' + hash;
     }
   }
@@ -97,7 +98,8 @@ class MChild extends pym.Child {
         null,
         hash ? '#' + hash : window.location.pathname + window.location.search
       );
-    } else {
+    }
+    else {
       location.hash = '#' + hash;
     }
   }
