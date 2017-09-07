@@ -68,6 +68,10 @@ class MParent extends pym.Parent {
     else {
       location.hash = '#' + hash;
     }
+
+    // If this code gets more abstracted, this should be seprated out or handled
+    // differently
+    this.sendMessage('urlchange', window.location.href);
   }
 
   // Explicitly get hash

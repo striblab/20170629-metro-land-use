@@ -387,26 +387,32 @@ setTimeout(() => {
 }, 1500);
 
 // Handle share links
-function shareLinks() {
-  return false;
+function shareLinks(url) {
+  url = _.isString(url) ? url : window.location.href;
 
-  let h = window.location.href;
-
-  $('.twitter-link').each(function() {
-    let current = $(this).attr('href');
-    let prefix = current.split('?')[0];
-    let query = current.split('?')[1]
-      ? queryString.parse('?' + h.split('?')[1])
-      : {};
-
-    // NOT PARSING
-    query.url = h;
-    $(this).attr('href', prefix + '?' + queryString.stringify(query));
+  [['.twitter-link', 'ur'], ['.facebook-link', 'u']].forEach(set => {
+    $(set[0]).each(function() {
+      let current = $(this).attr('href');
+      let prefix = current.split('?')[0];
+      let query = current.split('?')[1]
+        ? queryString.parse('?' + current.split('?')[1])
+        : {};
+      query[set[1]] = url;
+      $(this).attr('href', prefix + '?' + queryString.stringify(query));
+    });
   });
 }
 let throttledShareLinks = _.throttle(shareLinks, 200);
-window.addEventListener('hashchange', throttledShareLinks);
-$(document).ready(throttledShareLinks);
+
+// For embed, listen for parent changes, otherwise, list to local hash events
+if (utils.isEmbedded()) {
+  utils.pym.onMessage('urlchange', shareLinks);
+  utils.pym.hashRequest();
+}
+else {
+  window.addEventListener('hashchange', throttledShareLinks);
+  $(document).ready(throttledShareLinks);
+}
 
 // Handle error
 function error(e) {
