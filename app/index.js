@@ -390,7 +390,7 @@ setTimeout(() => {
 function shareLinks(url) {
   url = _.isString(url) ? url : window.location.href;
 
-  [['.twitter-link', 'ur'], ['.facebook-link', 'u']].forEach(set => {
+  [['.twitter-link', 'url'], ['.facebook-link', 'u']].forEach(set => {
     $(set[0]).each(function() {
       let current = $(this).attr('href');
       let prefix = current.split('?')[0];
